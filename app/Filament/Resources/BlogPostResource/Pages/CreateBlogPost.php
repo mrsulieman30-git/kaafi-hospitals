@@ -8,7 +8,7 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateBlogPost extends CreateRecord
 {
-    use CreateRecord\Concerns\Translatable;
+    use CreateRecord\Concerns\Translatable; // Required for creation
 
     protected static string $resource = BlogPostResource::class;
 
@@ -17,5 +17,10 @@ class CreateBlogPost extends CreateRecord
         return [
             Actions\LocaleSwitcher::make(),
         ];
+    }
+    
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

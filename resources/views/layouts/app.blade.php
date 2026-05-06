@@ -3,8 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    
+    <!-- Dynamic SEO & Meta Tags -->
+    @stack('meta')
+    
+    {{-- Fallback Meta Tags (Only if not provided by @stack('meta')) --}}
+    @if(!View::hasSection('og_tags') && !request()->routeIs('doctors.profile') && !request()->routeIs('blog.show'))
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+    @endif
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,73 +41,125 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     
-    <!-- Tailwind CSS (CDN for quick dev, will use Vite for prod) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        kaafi: {
-                            navy: '#003B73',
-                            blue: '#0062B8',
-                            red: '#DC3545',
-                            green: '#28A745',
-                            light: '#E8F4FD',
-                            gray: '#F8F9FA'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+
 </head>
 <body class="font-sans antialiased text-gray-800 bg-white">
+    <!-- Real-Time Patient Tracker -->
+    @php
+        // We only track actual frontend page loads, ignoring Livewire background pings
+        if (!request()->ajax() && !request()->is('livewire/*')) {
+            $sessionId = session()->getId();
+            $stat = \Illuminate\Support\Facades\DB::table('site_stats')->where('session_id', $sessionId)->first();
+            
+            if ($stat) {
+                // User refreshed or visited another page -> Increase Hits
+                \Illuminate\Support\Facades\DB::table('site_stats')
+                    ->where('session_id', $sessionId)
+                    ->increment('hits');
+            } else {
+                // Brand new visitor -> Increase Unique Visitors & Hits
+                \Illuminate\Support\Facades\DB::table('site_stats')->insert([
+                    'session_id' => $sessionId,
+                    'hits' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        }
+    @endphp
 
-    <!-- Top Bar -->
-    <div class="bg-[#003B73] text-white text-xs py-2 hidden md:block">
-        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
-            <div class="flex items-center space-x-6">
-                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Wadajir District, Mogadishu, Somalia</span>
-                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> +252 615 666 999</span>
-                <span class="flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg> info@kaafihospitals.so</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="/about" class="hover:text-gray-300 border-r border-blue-700 pr-4">About Us</a>
-                <a href="#" class="hover:text-gray-300 border-r border-blue-700 pr-4">Careers</a>
-                <a href="/blog" class="hover:text-gray-300 border-r border-blue-700 pr-4">News & Updates</a>
-                <!-- Language Switcher Placeholder -->
-                <div class="relative">
-                    <button class="flex items-center hover:text-gray-300">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg> English <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+    <!-- Super Minimalist Top Bar -->
+    <div class="bg-[#003B73] text-white py-1.5 text-xs font-medium border-b border-white/10">
+        <div class="container mx-auto px-4 max-w-7xl flex flex-wrap justify-between items-center gap-2">
+            
+            <!-- Left: Contact Info -->
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-1.5 text-blue-100">
+                    <x-heroicon-s-map-pin class="w-3.5 h-3.5" />
+                    <span>Wadajir District, Mogadishu, Somalia</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-blue-100">
+                    <x-heroicon-s-phone class="w-3.5 h-3.5" />
+                    <span>+252 615 666 999</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1.5 text-blue-100">
+                    <x-heroicon-s-envelope class="w-3.5 h-3.5" />
+                    <span>info@kaafihospitals.so</span>
                 </div>
             </div>
+
+            <!-- Middle: Minimalist Navigation Buttons (Placed right after email) -->
+            <div class="flex items-center gap-0.5 sm:gap-1 px-3 border-x border-white/20" x-data="{ isFullscreen: false }">
+                <button onclick="window.history.back()" class="p-1.5 rounded hover:bg-white/10 transition-colors text-blue-200 hover:text-white" title="Go Back">
+                    <x-heroicon-m-arrow-left class="w-3.5 h-3.5" />
+                </button>
+                <button onclick="window.history.forward()" class="p-1.5 rounded hover:bg-white/10 transition-colors text-blue-200 hover:text-white" title="Go Forward">
+                    <x-heroicon-m-arrow-right class="w-3.5 h-3.5" />
+                </button>
+                <button onclick="window.location.reload()" class="p-1.5 rounded hover:bg-white/10 transition-colors text-blue-200 hover:text-white" title="Refresh">
+                    <x-heroicon-m-arrow-path class="w-3.5 h-3.5" />
+                </button>
+                <button @click="
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                        isFullscreen = true;
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                            isFullscreen = false;
+                        }
+                    }
+                " class="p-1.5 rounded hover:bg-white/10 transition-colors text-blue-200 hover:text-white" title="Fullscreen">
+                    <x-heroicon-m-arrows-pointing-out x-show="!isFullscreen" class="w-3.5 h-3.5" />
+                    <x-heroicon-m-arrows-pointing-in x-show="isFullscreen" style="display: none;" class="w-3.5 h-3.5" />
+                </button>
+            </div>
+
+            <!-- Right: Language & Patient Portal -->
+            <div class="flex items-center gap-4">
+                <!-- Language Selector -->
+                <div class="flex items-center gap-1 text-blue-100 hover:text-white cursor-pointer transition-colors">
+                    <x-heroicon-m-globe-alt class="w-3.5 h-3.5" />
+                    <span>English</span>
+                    <x-heroicon-m-chevron-down class="w-3 h-3" />
+                </div>
+                <!-- Portal Link -->
+                <a href="/portal" class="hidden sm:flex items-center gap-1.5 text-white font-bold bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-colors">
+                    <x-heroicon-s-user class="w-3 h-3" />
+                    Patient Portal
+                </a>
+            </div>
+
         </div>
     </div>
 
+    @php $settings = \App\Models\SiteSetting::first(); @endphp
     <!-- Main Navigation -->
     <header class="bg-white shadow-sm sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
-        <div class="container mx-auto px-4 py-2 flex justify-between items-center max-w-7xl">
+        <div class="container mx-auto px-4 py-2 flex items-center max-w-7xl
+            {{ $settings?->logo_position === 'center' ? 'justify-between' : '' }} 
+            {{ $settings?->logo_position === 'right' ? 'flex-row-reverse justify-between' : 'justify-between' }}">
+            
             <!-- Logo -->
-            <a href="/" class="flex items-center">
-                <div class="flex items-center">
-                    <!-- Custom SVG representing the Kaafi Logo from the image -->
-                    <svg class="w-12 h-12 text-[#DC3545]" viewBox="0 0 100 100" fill="currentColor">
-                        <path d="M 50 10 C 25 10 10 30 10 50 C 10 70 25 90 50 90 C 75 90 90 75 90 60 L 75 60 C 75 70 65 75 50 75 C 35 75 25 60 25 50 C 25 40 35 25 50 25 C 65 25 75 35 75 45 L 90 45 C 90 25 75 10 50 10 Z" fill="#DC3545"/>
-                        <path d="M 50 20 C 30 20 18 35 18 50 C 18 65 30 80 50 80" stroke="#003B73" stroke-width="6" fill="none"/>
-                    </svg>
-                    <div class="ml-2 flex flex-col justify-center leading-none">
-                        <div class="flex items-baseline">
-                            <span class="text-[#DC3545] font-bold text-2xl tracking-tight">KAAFI</span>
-                            <span class="text-[#003B73] font-bold text-xl tracking-tight ml-1">HOSPITALS</span>
+            <a href="/" class="flex items-center flex-shrink-0 {{ $settings?->logo_position === 'center' ? 'mx-auto' : '' }}">
+                @if($settings && $settings->logo_path)
+                    <img src="{{ asset('storage/' . $settings->logo_path) }}" alt="KAAFI Logo" style="height: {{ $settings->logo_height ?? 40 }}px; object-fit: contain;">
+                @else
+                    <div class="flex items-center">
+                        <!-- Custom SVG representing the Kaafi Logo from the image -->
+                        <svg class="w-12 h-12 text-[#DC3545]" viewBox="0 0 100 100" fill="currentColor">
+                            <path d="M 50 10 C 25 10 10 30 10 50 C 10 70 25 90 50 90 C 75 90 90 75 90 60 L 75 60 C 75 70 65 75 50 75 C 35 75 25 60 25 50 C 25 40 35 25 50 25 C 65 25 75 35 75 45 L 90 45 C 90 25 75 10 50 10 Z" fill="#DC3545"/>
+                            <path d="M 50 20 C 30 20 18 35 18 50 C 18 65 30 80 50 80" stroke="#003B73" stroke-width="6" fill="none"/>
+                        </svg>
+                        <div class="ml-2 flex flex-col justify-center leading-none">
+                            <div class="flex items-baseline">
+                                <span class="text-[#DC3545] font-bold text-2xl tracking-tight">KAAFI</span>
+                                <span class="text-[#003B73] font-bold text-xl tracking-tight ml-1">HOSPITALS</span>
+                            </div>
+                            <span class="text-[#0062B8] font-semibold text-[0.65rem] tracking-widest mt-1">KEEPING YOU WELL</span>
                         </div>
-                        <span class="text-[#0062B8] font-semibold text-[0.65rem] tracking-widest mt-1">KEEPING YOU WELL</span>
                     </div>
-                </div>
+                @endif
             </a>
 
             <!-- Mobile Menu Button -->
@@ -142,6 +201,16 @@
                     <span class="text-sm font-bold leading-tight">Patients & Visitors</span>
                     <span class="text-[0.65rem] text-gray-500 font-medium">Booqdayaasha</span>
                 </a>
+                <a href="/posts" class="flex flex-col items-center group {{ request()->is('posts*') ? 'text-[#0062B8]' : 'text-[#003B73] hover:text-[#0062B8]' }} transition">
+                    <x-heroicon-o-document-text class="w-5 h-5 mb-1" />
+                    <span class="text-sm font-bold leading-tight">Health Blog</span>
+                    <span class="text-[0.65rem] text-gray-500 font-medium">Xogta Caafimaadka</span>
+                </a>
+                <a href="/offers" class="flex flex-col items-center group {{ request()->is('offers*') ? 'text-[#0062B8]' : 'text-[#003B73] hover:text-[#0062B8]' }} transition">
+                    <x-heroicon-o-gift class="w-5 h-5 mb-1 text-red-500" />
+                    <span class="text-sm font-bold leading-tight">Offers</span>
+                    <span class="text-[0.65rem] text-gray-500 font-medium">Ogeysiisyada</span>
+                </a>
                 <a href="/contact" class="flex flex-col items-center group {{ request()->is('contact') ? 'text-[#0062B8]' : 'text-[#003B73] hover:text-[#0062B8]' }} transition">
                     <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     <span class="text-sm font-bold leading-tight">Contact Us</span>
@@ -172,6 +241,8 @@
                 <a href="/about" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">About Us / Naga Ku Saabsan</a>
                 <a href="/departments" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">Departments / Waaxyaha</a>
                 <a href="/doctors" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">Doctors / Dhakhaatiirta</a>
+                <a href="/posts" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">Health Blog / Xogta Caafimaadka</a>
+                <a href="/offers" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">Special Offers / Ogeysiisyada</a>
                 <a href="/contact" class="block px-3 py-2 rounded-md text-base font-medium text-[#003B73] hover:text-[#0062B8] hover:bg-gray-50">Contact Us / Nala Soo Xiriir</a>
                 <a href="/appointment" class="block mt-4 text-center bg-[#DC3545] hover:bg-red-700 text-white px-5 py-3 rounded-md font-bold transition shadow-md">Book Appointment</a>
             </div>
@@ -180,6 +251,7 @@
 
     <!-- Main Content -->
     <main class="min-h-screen">
+        {{ $slot ?? '' }}
         @yield('content')
     </main>
 

@@ -9,58 +9,103 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AppointmentResource extends Resource
 {
     protected static ?string $model = Appointment::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Hospital Management';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Reception Desk';
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Patient Details')
+                Forms\Components\Grid::make(3)
                     ->schema([
-                        Forms\Components\TextInput::make('patient_name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('patient_phone')
-                            ->tel()
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('patient_email')
-                            ->email()
-                            ->maxLength(255),
-                        Forms\Components\Select::make('user_id')
-                            ->relationship('user', 'name')
-                            ->nullable(),
-                    ])->columns(2),
-                    
-                Forms\Components\Section::make('Appointment Details')
-                    ->schema([
-                        Forms\Components\Select::make('department_id')
-                            ->relationship('department', 'name')
-                            ->nullable(),
-                        Forms\Components\Select::make('doctor_id')
-                            ->relationship('doctor', 'name')
-                            ->nullable(),
-                        Forms\Components\DatePicker::make('appointment_date')
-                            ->required(),
-                        Forms\Components\TimePicker::make('appointment_time')
-                            ->required(),
-                        Forms\Components\Select::make('status')
-                            ->options([
-                                'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'completed' => 'Completed',
-                                'cancelled' => 'Cancelled',
-                            ])
-                            ->required()
-                            ->default('pending'),
-                        Forms\Components\Textarea::make('notes')
-                            ->columnSpanFull(),
-                    ])->columns(2),
+                        // Main Appointment Column
+                        Forms\Components\Section::make('Schedule Consultation')
+                            ->schema([
+                                Forms\Components\Select::make('department_id')
+                                    ->relationship('department', 'name')
+                                    ->required()
+                                    ->preload()
+                                    ->live(), // Auto-updates the doctor list based on department
+                                    
+                                Forms\Components\Select::make('doctor_id')
+                                    ->relationship('doctor', 'name', fn (Builder $query, Forms\Get $get) => 
+                                        $get('department_id') ? $query->where('department_id', $get('department_id')) : $query
+                                    )
+                                    ->required()
+                                    ->searchable()
+                                    ->preload(),
+                                    
+                                Forms\Components\DatePicker::make('appointment_date')
+                                    ->required()
+                                    ->native(false)
+                                    ->minDate(today()),
+                                    
+                                Forms\Components\TimePicker::make('appointment_time')
+                                    ->required()
+                                    ->datalist([
+                                        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                                        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+                                    ]),
+                                    
+                                Forms\Components\Textarea::make('notes')
+                                    ->columnSpanFull()
+                                    ->placeholder('Patient symptoms or reception notes...'),
+                            ])->columns(2)->columnSpan(2),
+
+                        // Sidebar: Patient Details & Status
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Section::make('Patient Identity')
+                                    ->schema([
+                                        Forms\Components\Select::make('user_id')
+                                            ->label('Registered Patient Account')
+                                            ->relationship('user', 'name', fn (Builder $query) => $query->role('Patient'))
+                                            ->searchable()
+                                            ->preload()
+                                            ->helperText('Link to an existing patient portal account.'),
+                                            
+                                        Forms\Components\TextInput::make('patient_name')
+                                            ->label('Walk-in Name')
+                                            ->required()
+                                            ->maxLength(255),
+                                            
+                                        Forms\Components\TextInput::make('patient_phone')
+                                            ->tel()
+                                            ->required()
+                                            ->prefix('+252'),
+                                    ]),
+                                    
+                                Forms\Components\Section::make('Status')
+                                    ->schema([
+                                        Forms\Components\ToggleButtons::make('status')
+                                            ->options([
+                                                'pending' => 'Pending',
+                                                'approved' => 'Approved',
+                                                'completed' => 'Completed',
+                                                'cancelled' => 'Cancelled',
+                                            ])
+                                            ->colors([
+                                                'pending' => 'warning',
+                                                'approved' => 'success',
+                                                'completed' => 'info',
+                                                'cancelled' => 'danger',
+                                            ])
+                                            ->inline()
+                                            ->required()
+                                            ->default('pending'),
+                                    ]),
+                            ])->columnSpan(1),
+                    ]),
             ]);
     }
 
@@ -69,25 +114,31 @@ class AppointmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('patient_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('patient_phone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('department.name')
-                    ->sortable(),
+                    ->label('Patient')
+                    ->searchable()
+                    ->weight('bold')
+                    ->description(fn (Appointment $record) => $record->patient_phone),
+                    
                 Tables\Columns\TextColumn::make('doctor.name')
-                    ->sortable(),
+                    ->label('Doctor')
+                    ->badge()
+                    ->color('gray'),
+                    
                 Tables\Columns\TextColumn::make('appointment_date')
-                    ->date()
+                    ->label('Date & Time')
+                    ->date('D, M d, Y')
+                    ->description(fn (Appointment $record) => \Carbon\Carbon::parse($record->appointment_time)->format('h:i A'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('appointment_time')
-                    ->time(),
-                Tables\Columns\BadgeColumn::make('status')
+                    
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
                     ->colors([
                         'warning' => 'pending',
                         'success' => fn ($state) => in_array($state, ['approved', 'completed']),
                         'danger' => 'cancelled',
                     ]),
             ])
+            ->defaultSort('appointment_date', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
@@ -96,26 +147,14 @@ class AppointmentResource extends Resource
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
                     ]),
-                Tables\Filters\Filter::make('upcoming')
-                    ->query(fn (Builder $query): Builder => $query->where('appointment_date', '>=', now()->toDateString()))
-                    ->label('Upcoming Appointments')
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()->slideOver(), // Added View
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+    public static function getRelations(): array { return []; }
 
     public static function getPages(): array
     {

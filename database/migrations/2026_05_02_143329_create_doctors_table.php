@@ -13,7 +13,8 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->json('title');
             $table->json('bio')->nullable();
-            $table->string('photo')->nullable();
+            $table->string('image')->nullable();
+            $table->string('image_url', 2048)->nullable();
             $table->string('phone')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

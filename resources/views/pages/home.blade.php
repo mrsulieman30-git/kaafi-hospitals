@@ -1,10 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    <livewire:smart-ad-widget />
+    @php $settings = \App\Models\SiteSetting::first(); @endphp
     <!-- Hero Section -->
     <div class="relative w-full h-[600px] overflow-hidden">
-        <!-- Background Image -->
-        <img class="absolute inset-0 w-full h-full object-cover object-center" src="{{ asset('images/hospital-reception.jpg') }}" alt="Hospital Reception" onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80'">
+        <!-- Dynamic Background Image -->
+        @if($settings && $settings->hero_bg_path)
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $settings->hero_bg_path) }}'); opacity: {{ $settings->hero_bg_opacity / 100 }};"></div>
+        @else
+            <img class="absolute inset-0 w-full h-full object-cover object-center" src="{{ asset('images/hospital-reception.jpg') }}" alt="Hospital Reception" onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80'">
+        @endif
         
         <!-- Gradient Overlay to make text readable on the left -->
         <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
@@ -124,4 +130,6 @@
             </div>
         </div>
     </div>
+    <!-- Latest Health Insights Section -->
+    <livewire:home-latest-blog />
 @endsection

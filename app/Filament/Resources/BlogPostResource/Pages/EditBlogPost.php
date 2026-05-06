@@ -8,7 +8,7 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditBlogPost extends EditRecord
 {
-    use EditRecord\Concerns\Translatable;
+    use EditRecord\Concerns\Translatable; // Required for editing
 
     protected static string $resource = BlogPostResource::class;
 
@@ -18,5 +18,10 @@ class EditBlogPost extends EditRecord
             Actions\LocaleSwitcher::make(),
             Actions\DeleteAction::make(),
         ];
+    }
+    
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

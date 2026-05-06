@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $superAdmin = Role::create(['name' => 'Super Admin']);
         $receptionist = Role::create(['name' => 'Receptionist']);
         $doctorRole = Role::create(['name' => 'Doctor']);
+        $patientRole = Role::create(['name' => 'Patient']); // Added missing Patient role
 
         // 2. Users
         $admin = User::create([
@@ -59,6 +60,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 4. Doctors
+        $images = [
+            'https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=800',
+            'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.pexels.com/photos/5327656/pexels-photo-5327656.jpeg?auto=compress&cs=tinysrgb&w=800',
+            'https://images.unsplash.com/photo-1537368910025-700350fe46c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+        ];
+
         $doctors = [
             [
                 'department_id' => $cardiology->id,
@@ -113,13 +122,17 @@ class DatabaseSeeder extends Seeder
                 'department_id' => $laboratory->id,
                 'name' => ['en' => 'Mohammad Sulieman', 'so' => 'Maxamed Suleymaan'],
                 'slug' => 'mohammad-sulieman',
-                'title' => ['en' => 'Laboratory Manager (Sudan)', 'so' => 'Maamulaha Shaybaarka'],
+                'title' => ['en' => 'Laboratory Manager', 'so' => 'Maamulaha Shaybaarka'],
                 'phone' => '+252 61 000 0008',
             ]
         ];
 
-        foreach ($doctors as $docData) {
+        foreach ($doctors as $index => $docData) {
+            $docData['image_url'] = $images[$index % count($images)];
             Doctor::create($docData);
         }
+
+        // 5. Blog Posts
+        $this->call(MedicalPostSeeder::class);
     }
 }

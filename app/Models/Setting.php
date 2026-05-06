@@ -1,13 +1,33 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $guarded = [];
-    
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'key',
+        'value',
+        'type', // e.g., 'text', 'boolean', 'image', 'json'
+        'group', // e.g., 'general', 'contact', 'social', 'theme'
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'value' => 'json',
+        // Automatically handle JSON casting if you store arrays in settings
+        'value' => 'string',
     ];
 }

@@ -3,7 +3,10 @@
 @section('title', ($post->meta_title ?: $post->title) . ' - KAAFI Hospitals Blog')
 @section('meta_description', $post->meta_description ?: ($post->excerpt ?: Str::limit(strip_tags($post->content), 160)))
 
-@section('og_tags')
+@push('meta')
+    <title>{{ ($post->meta_title ?: $post->title) . ' - KAAFI Hospitals Blog' }}</title>
+    <meta name="description" content="{{ $post->meta_description ?: ($post->excerpt ?: Str::limit(strip_tags($post->content), 160)) }}">
+
     {{-- Open Graph (Facebook, LinkedIn, WhatsApp) --}}
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ $post->meta_title ?: $post->title }}">
@@ -58,7 +61,7 @@
       }
     }
     </script>
-@endsection
+@endpush
 
 @section('content')
     {{-- Hero Image --}}

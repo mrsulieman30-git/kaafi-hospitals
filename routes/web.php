@@ -3,41 +3,39 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Doctor;
 use App\Models\BlogPost;
+use App\Models\Page;
 
 Route::get('/', function () {
     $doctors = Doctor::with('department')->where('is_active', true)->take(4)->get();
     return view('pages.home', compact('doctors'));
 });
 
-Route::get('/about', function () {
-    return view('pages.about');
-});
+// Static pages can remain, or you can delete these and recreate them in your new Admin CMS!
+Route::get('/about', function () { return view('pages.about'); });
+Route::get('/contact', function () { return view('pages.contact'); });
 
 Route::get('/departments', function () {
     return view('pages.departments.index');
 });
 
 Route::get('/doctor/{slug}', function ($slug) {
-    $doctor = Doctor::where('slug', $slug)->firstOrFail();
+    $doctor = \App\Models\Doctor::where('slug', $slug)->firstOrFail();
     return view('pages.doctor', compact('doctor'));
 })->name('doctor.show');
 
-Route::get('/doctors', function () {
-    $doctors = Doctor::with('department')->where('is_active', true)->get();
-    return view('pages.doctors.index', compact('doctors'));
-});
+Route::get('/doctors/{doctor}', \App\Livewire\DoctorProfile::class)->name('doctors.profile');
+Route::get('/book-appointment/{doctor?}', \App\Livewire\BookAppointment::class)->name('book.appointment');
+
+
+Route::get('/doctors', \App\Livewire\DoctorsIndex::class)->name('doctors.index');
 
 // ── Blog Routes ──────────────────────────────────────────────
-Route::get('/blog', function () {
-    $posts = BlogPost::with(['category', 'user', 'comments'])
-        ->where('is_published', true)
-        ->orderBy('published_at', 'desc')
-        ->paginate(9);
-    return view('pages.blog.index', compact('posts'));
-});
+Route::get('/posts', \App\Livewire\BlogIndex::class)->name('blog.index');
+Route::get('/posts/{slug}', \App\Livewire\BlogPostShow::class)->name('blog.show');
+Route::get('/blog', \App\Livewire\BlogIndex::class); // Redirect/Alias for convenience
 
 Route::get('/blog/{slug}', function ($slug) {
-    $post = BlogPost::with(['category', 'user', 'comments' => function ($q) {
+    $post = BlogPost::with(['category', 'comments' => function ($q) {
         $q->where('is_approved', true)->orderBy('created_at', 'desc');
     }])->where('slug', $slug)
       ->where('is_published', true)
@@ -53,13 +51,12 @@ Route::get('/blog/{slug}', function ($slug) {
     return view('pages.blog.show', compact('post', 'relatedPosts'));
 })->name('blog.show');
 
+// ── Offers ──
+Route::get('/offers', \App\Livewire\OffersIndex::class)->name('offers.index');
+
 // ── Appointment ──────────────────────────────────────────────
 Route::get('/appointment', function () {
     return view('pages.appointment.index');
-});
-
-Route::get('/contact', function () {
-    return view('pages.contact');
 });
 
 // ── Sitemap ──────────────────────────────────────────────────
@@ -74,3 +71,10 @@ Route::get('/sitemap.xml', function () {
         'posts' => $posts,
     ])->header('Content-Type', 'text/xml');
 });
+
+// ── DYNAMIC CMS Catch-All Route ──────────────────────────────
+// This MUST be at the very bottom. It catches any URL not defined above.
+Route::get('/{slug}', function ($slug) {
+    $page = Page::where('slug', $slug)->where('is_published', true)->firstOrFail();
+    return view('pages.dynamic', compact('page'));
+})->name('page.show');
