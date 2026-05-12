@@ -117,7 +117,10 @@
                                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">{{ __('Available Doctors') }}</p>
                                 </div>
                                 @foreach($doctors as $doc)
-                                    <div wire:click="$set('doctor_id', '{{ $doc->id }}'); open = false" class="p-4 flex items-center gap-4 hover:bg-blue-50/50 cursor-pointer border-b border-gray-50 last:border-0 transition group">
+                                    <div wire:key="doc-{{ $doc->id }}" 
+                                        @click="open = false"
+                                        wire:click="selectDoctor({{ $doc->id }})" 
+                                        class="p-4 flex items-center gap-4 hover:bg-blue-50/50 cursor-pointer border-b border-gray-50 last:border-0 transition group">
                                         <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-transparent group-hover:border-[#0062B8]/20 transition-all">
                                             <img src="{{ $doc->display_image }}" class="w-full h-full object-cover">
                                         </div>
@@ -134,7 +137,7 @@
                                 @endforeach
                             </div>
                         </div>
-                        <input type="hidden" wire:model.live="doctor_id">
+                        <input type="hidden" id="doctor_id_hidden" value="{{ $doctor_id }}">
                         @error('doctor_id')<span class="text-red-500 text-xs font-bold mt-2 block">{{ $message }}</span>@enderror
                     </div>
 

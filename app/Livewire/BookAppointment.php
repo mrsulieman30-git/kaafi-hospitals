@@ -66,6 +66,12 @@ class BookAppointment extends Component
         }
     }
 
+    public function selectDoctor($id)
+    {
+        $this->doctor_id = (string) $id;
+        $this->updatedDoctorId();
+    }
+
     public function updatedDoctorId()
     {
         $this->appointment_date = '';
