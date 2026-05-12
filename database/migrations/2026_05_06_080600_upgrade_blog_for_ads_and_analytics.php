@@ -20,6 +20,7 @@ return new class extends Migration
                 $table->integer('views')->default(0);
                 $table->integer('likes')->default(0);
                 $table->unsignedBigInteger('linked_doctor_id')->nullable();
+                $table->timestamp('offer_end_date')->nullable();
             }
         });
 
@@ -39,7 +40,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('blog_posts', function (Blueprint $table) {
-            $table->dropColumn(['type', 'old_price', 'new_price', 'has_appointment_btn', 'views', 'likes', 'linked_doctor_id']);
+            $table->dropColumn(['type', 'old_price', 'new_price', 'has_appointment_btn', 'views', 'likes', 'linked_doctor_id', 'offer_end_date']);
         });
         Schema::dropIfExists('site_stats');
     }

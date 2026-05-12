@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Resources\Concerns\Translatable;
 use Illuminate\Support\Str;
 
 class DepartmentResource extends Resource
@@ -21,19 +22,42 @@ class DepartmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                Forms\Components\Section::make('Department Details (English)')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        Forms\Components\TextInput::make('name.en')
+                            ->label('Name (English)')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                        Forms\Components\RichEditor::make('description.en')
+                            ->label('Description (English)')
+                            ->columnSpanFull(),
+                    ])->columns(1),
+                    
+                Forms\Components\Section::make('Department Details (Somali)')
+                    ->schema([
+                        Forms\Components\TextInput::make('name.so')
+                            ->label('Name (Somali)')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\RichEditor::make('description.so')
+                            ->label('Description (Somali)')
+                            ->columnSpanFull(),
+                    ])->columns(1),
+                    
+                Forms\Components\Section::make('Settings')
+                    ->schema([
+                        Forms\Components\Select::make('parent_id')
+                            ->label('Parent Department')
+                            ->relationship('parent', 'name')
+                            ->placeholder('None (Parent Department)')
+                            ->searchable()
+                            ->preload(),
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        Forms\Components\Textarea::make('description')
-                            ->columnSpanFull(),
                         Forms\Components\FileUpload::make('image')
                             ->image()
                             ->directory('departments'),

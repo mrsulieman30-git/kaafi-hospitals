@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Resources\Concerns\Translatable;
 
 class DoctorResource extends Resource
 {
@@ -27,10 +28,11 @@ class DoctorResource extends Resource
                     ->schema([
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\Section::make('Professional Details')
-                                    ->description('Public information displayed on the website.')
+                                Forms\Components\Section::make('Professional Details (English)')
+                                    ->description('English information displayed on the website.')
                                     ->schema([
-                                        Forms\Components\TextInput::make('name')
+                                        Forms\Components\TextInput::make('name.en')
+                                            ->label('Name (English)')
                                             ->required()
                                             ->maxLength(255)
                                             ->live(onBlur: true)
@@ -38,16 +40,43 @@ class DoctorResource extends Resource
                                                 $operation === 'create' ? $set('slug', Str::slug($state)) : null
                                             ),
 
+                                        Forms\Components\TextInput::make('title.en')
+                                            ->label('Title (English)')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('e.g., Consultant Cardiologist'),
+
+                                        Forms\Components\RichEditor::make('bio.en')
+                                            ->label('Biography (English)')
+                                            ->columnSpanFull(),
+                                    ])->columns(2),
+
+                                Forms\Components\Section::make('Professional Details (Somali)')
+                                    ->description('Somali information displayed on the website.')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name.so')
+                                            ->label('Name (Somali)')
+                                            ->required()
+                                            ->maxLength(255),
+
+                                        Forms\Components\TextInput::make('title.so')
+                                            ->label('Title (Somali)')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('e.g., Khabiirka Wadnaha'),
+
+                                        Forms\Components\RichEditor::make('bio.so')
+                                            ->label('Biography (Somali)')
+                                            ->columnSpanFull(),
+                                    ])->columns(2),
+
+                                Forms\Components\Section::make('System & Contact Details')
+                                    ->schema([
                                         Forms\Components\TextInput::make('slug')
                                             ->required()
                                             ->unique(ignoreRecord: true)
                                             ->maxLength(255)
                                             ->helperText('URL friendly name.'),
-
-                                        Forms\Components\TextInput::make('title')
-                                            ->required()
-                                            ->maxLength(255)
-                                            ->placeholder('e.g., Consultant Cardiologist'),
 
                                         Forms\Components\Select::make('department_id')
                                             ->relationship('department', 'name')
@@ -73,6 +102,7 @@ class DoctorResource extends Resource
                                         // Custom view to preview the video instantly
                                         Forms\Components\ViewField::make('video_preview')
                                             ->view('filament.forms.components.youtube-preview')
+                                            ->dehydrated(false)
                                             ->visible(fn (Forms\Get $get) => filled($get('youtube_video_url'))),
                                     ]),
                             ])->columnSpan(2),

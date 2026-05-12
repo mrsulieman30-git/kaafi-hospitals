@@ -10,9 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Resources\Concerns\Translatable;
 
 class BlogCategoryResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = BlogCategory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';

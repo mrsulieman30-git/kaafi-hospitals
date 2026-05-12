@@ -5,8 +5,15 @@ use App\Models\Doctor;
 use App\Models\BlogPost;
 use App\Models\Page;
 
+Route::get('/language/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'so'])) {
+        session()->put('locale', $locale);
+    }
+    return redirect()->back();
+})->name('language.switch');
+
 Route::get('/', function () {
-    $doctors = Doctor::with('department')->where('is_active', true)->take(4)->get();
+    $doctors = Doctor::with('department')->where('is_active', true)->inRandomOrder()->take(4)->get();
     return view('pages.home', compact('doctors'));
 });
 
@@ -16,7 +23,12 @@ Route::get('/contact', function () { return view('pages.contact'); });
 
 Route::get('/departments', function () {
     return view('pages.departments.index');
-});
+})->name('departments.index');
+
+Route::get('/departments/{slug}', function ($slug) {
+    $department = \App\Models\Department::where('slug', $slug)->firstOrFail();
+    return view('pages.departments.show', compact('department'));
+})->name('departments.show');
 
 Route::get('/doctor/{slug}', function ($slug) {
     $doctor = \App\Models\Doctor::where('slug', $slug)->firstOrFail();

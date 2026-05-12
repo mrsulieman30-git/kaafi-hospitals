@@ -1,18 +1,3 @@
-@php
-    $getLocalizedString = function($field) {
-        if (empty($field)) return '';
-        if (is_array($field)) return $field['en'] ?? ($field['so'] ?? 'Unknown');
-        if (is_string($field) && str_starts_with(trim($field), '{')) {
-            $decoded = json_decode($field, true);
-            if (isset($decoded['en']) && $decoded['en'] === '[object Object]') {
-                return $decoded['so'] ?? 'Dr. Axmed Khaan'; 
-            }
-            return $decoded['en'] ?? ($decoded['so'] ?? $field);
-        }
-        return $field;
-    };
-@endphp
-
 <div class="bg-gray-50 min-h-screen pb-24 font-sans pt-8 lg:pt-12">
     
     <!-- Modern, Space-Saving Dashboard Toolbar -->
@@ -23,10 +8,10 @@
             <div class="flex-1">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#0062B8] text-xs font-bold uppercase tracking-wider mb-3">
                     <x-heroicon-s-sparkles class="w-4 h-4" />
-                    Expert Care
+                    {{ __('Expert Care') }}
                 </div>
-                <h1 class="text-3xl lg:text-4xl font-black text-[#003B73] tracking-tight mb-2">Our Specialists</h1>
-                <p class="text-gray-500 font-medium text-sm lg:text-base">Find and book appointments with our world-class medical team.</p>
+                <h1 class="text-3xl lg:text-4xl font-black text-[#003B73] tracking-tight mb-2">{{ __('Our Specialists') }}</h1>
+                <p class="text-gray-500 font-medium text-sm lg:text-base">{{ __('Find and book appointments with our world-class medical team.') }}</p>
             </div>
 
             <!-- Right Side: Search & Filter Controls -->
@@ -37,7 +22,7 @@
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <x-heroicon-o-magnifying-glass class="h-5 w-5 text-gray-400 group-focus-within:text-[#0062B8] transition-colors" />
                     </div>
-                    <input wire:model.live.debounce.300ms="search" type="text" class="block w-full pl-11 pr-4 py-3.5 text-sm rounded-2xl border border-gray-200 focus:border-[#0062B8] focus:ring-4 focus:ring-blue-50 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-400 transition-all font-medium" placeholder="Search doctor by name...">
+                    <input wire:model.live.debounce.300ms="search" type="text" class="block w-full pl-11 pr-4 py-3.5 text-sm rounded-2xl border border-gray-200 focus:border-[#0062B8] focus:ring-4 focus:ring-blue-50 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-400 transition-all font-medium" placeholder="{{ __('Search doctor by name...') }}">
                 </div>
                 
                 <!-- Department Selector -->
@@ -45,10 +30,10 @@
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <x-heroicon-o-building-office class="h-5 w-5 text-gray-400 group-focus-within:text-[#0062B8] transition-colors" />
                     </div>
-                    <select wire:model.live="department_id" class="block w-full pl-11 pr-10 py-3.5 text-sm rounded-2xl border border-gray-200 focus:border-[#0062B8] focus:ring-4 focus:ring-blue-50 bg-gray-50 focus:bg-white text-gray-900 transition-all font-medium appearance-none cursor-pointer">
-                        <option value="">All Departments</option>
+                    <select wire:model.live="department_id" class="block w-full pl-11 pr-10 py-3.5 text-sm rounded-2xl border border-gray-100 focus:border-[#0062B8] focus:ring-4 focus:ring-blue-50 bg-gray-50 focus:bg-white text-gray-900 transition-all font-medium appearance-none cursor-pointer">
+                        <option value="">{{ __('All Departments') }}</option>
                         @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}">{{ $getLocalizedString($dept->name) }}</option>
+                            <option value="{{ $dept->id }}">{{ $dept->localized_name }}</option>
                         @endforeach
                     </select>
                     <!-- Custom Dropdown Arrow -->
@@ -75,7 +60,7 @@
                         <!-- Department Badge -->
                         <div class="absolute bottom-4 left-4 right-4">
                             <span class="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30 shadow-sm">
-                                {{ $doctor->department ? $getLocalizedString($doctor->department->name) : 'General Medicine' }}
+                                {{ $doctor->department ? $doctor->department->localized_name : __('General Medicine') }}
                             </span>
                         </div>
                     </div>
@@ -84,21 +69,21 @@
                     <div class="p-6 flex flex-col flex-1 text-center items-center justify-between">
                         <div class="w-full">
                             <h3 class="text-xl font-black text-[#003B73] mb-1 line-clamp-1">
-                                {{ $getLocalizedString($doctor->name) }}
+                                {{ $doctor->localized_name }}
                             </h3>
                             <p class="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-4 line-clamp-1">
-                                {{ $doctor->department ? $getLocalizedString($doctor->department->name) : 'Specialist' }}
+                                {{ $doctor->department ? $doctor->department->localized_name : __('Specialist') }}
                             </p>
                         </div>
 
                         <!-- THE FIX: Real routing for Profile & Booking -->
                         <div class="flex gap-2 w-full mt-4">
                             <a href="{{ route('doctors.profile', $doctor->id) }}" class="flex-1 bg-white text-gray-700 font-bold py-3 rounded-xl border border-gray-200 hover:border-[#003B73] hover:text-[#003B73] transition-colors flex items-center justify-center text-sm shadow-sm">
-                                View Profile
+                                {{ __('View Profile') }}
                             </a>
                             <a href="{{ route('book.appointment', $doctor->id) }}" class="flex-[1.5] bg-[#0062B8] text-white font-bold py-3 rounded-xl border border-transparent hover:bg-[#003B73] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm group/btn">
                                 <x-heroicon-o-calendar-days class="w-4 h-4 group-hover/btn:animate-bounce" />
-                                Book
+                                {{ __('Book') }}
                             </a>
                         </div>
                     </div>
@@ -108,8 +93,8 @@
                     <div class="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg mb-6">
                         <x-heroicon-o-users class="w-12 h-12 text-gray-400" />
                     </div>
-                    <h3 class="text-2xl font-black text-[#003B73] mb-2">No doctors found</h3>
-                    <p class="text-gray-500 font-medium">Try adjusting your search or department filter.</p>
+                    <h3 class="text-2xl font-black text-[#003B73] mb-2">{{ __('No doctors found') }}</h3>
+                    <p class="text-gray-500 font-medium">{{ __('Try adjusting your search or department filter.') }}</p>
                 </div>
             @endforelse
         </div>

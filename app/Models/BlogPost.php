@@ -54,15 +54,16 @@ class BlogPost extends Model
 
     public static function getRandomPriorityAd()
     {
-        return self::where('type', 'ad')
+        $ads = self::where('type', 'ad')
             ->where('is_published', true)
             ->where(function ($query) {
                 $query->whereNull('offer_end_date')
                       ->orWhere('offer_end_date', '>=', now());
             })
             ->latest()
-            ->take(5) // Get the 5 most recent
-            ->get()
-            ->whenNotEmpty(fn($collection) => $collection->random(1)->first());
+            ->take(5)
+            ->get();
+            
+        return $ads->isEmpty() ? null : $ads->random();
     }
 }

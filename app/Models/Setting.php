@@ -27,7 +27,6 @@ class Setting extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        // Automatically handle JSON casting if you store arrays in settings
-        'value' => 'string',
+        'value' => 'json',
     ];
 }

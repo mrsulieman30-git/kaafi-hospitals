@@ -25,9 +25,9 @@
 
     <div class="container mx-auto px-4 max-w-7xl relative z-10">
         <nav class="mb-8 flex text-sm text-gray-500 font-medium">
-            <a href="/" class="hover:text-[#0062B8] transition">Home</a>
+            <a href="/" class="hover:text-[#0062B8] transition">{{ __('Home') }}</a>
             <span class="mx-2">/</span>
-            <a href="/doctors" class="hover:text-[#0062B8] transition">Our Doctors</a>
+            <a href="/doctors" class="hover:text-[#0062B8] transition">{{ __('Our Doctors') }}</a>
             <span class="mx-2">/</span>
             <span class="text-[#003B73]">{{ $doctor->name }}</span>
         </nav>
@@ -53,13 +53,24 @@
                         
                         <div class="inline-flex items-center gap-2 bg-sky-50 text-sky-700 px-4 py-2 rounded-xl text-sm font-semibold mb-8">
                             <x-heroicon-o-building-office class="w-5 h-5" />
-                            {{ $doctor->department->name ?? 'General Medicine' }}
+                            {{ $doctor->department->name ?? __('General Medicine') }}
                         </div>
 
-                        <a href="/appointment" class="flex items-center justify-center gap-2 w-full bg-[#DC3545] hover:bg-red-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-red-500/30 transition-all hover:-translate-y-1">
+                        <a href="/appointment" class="flex items-center justify-center gap-2 w-full bg-[#DC3545] hover:bg-red-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-red-500/30 transition-all hover:-translate-y-1 mb-8">
                             <x-heroicon-o-calendar-days class="w-6 h-6" />
-                            Book Appointment
+                            {{ __('Book Appointment') }}
                         </a>
+
+                        @if($doctor->bio)
+                            <div class="text-left pt-8 border-t border-gray-100">
+                                <h3 class="text-[#003B73] font-black text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="w-4 h-[2px] bg-blue-500"></span> {{ __('Professional Bio') }}
+                                </h3>
+                                <div class="text-gray-600 leading-relaxed prose prose-sm max-w-none prose-headings:text-[#003B73] prose-a:text-blue-600">
+                                    {!! $doctor->bio !!}
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -68,7 +79,7 @@
                 <div class="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-6">
                     <h3 class="text-lg font-black text-[#003B73] mb-4 flex items-center gap-2">
                         <x-heroicon-o-play-circle class="w-6 h-6 text-red-500" />
-                        Meet {{ $doctor->name }}
+                        {{ __('Meet') }} {{ $doctor->name }}
                     </h3>
                     <div class="relative w-full rounded-2xl overflow-hidden aspect-video shadow-inner bg-gray-900">
                         <iframe 
@@ -90,9 +101,9 @@
                     <div class="mb-8">
                         <h2 class="text-2xl font-black text-[#003B73] flex items-center gap-3">
                             <x-heroicon-o-calendar class="w-8 h-8 text-sky-500" />
-                            Doctor's Availability
+                            {{ __("Doctor's Availability") }}
                         </h2>
-                        <p class="text-gray-500 mt-2 font-medium">Real-time schedule. Highlighted days indicate when the doctor is accepting consultations.</p>
+                        <p class="text-gray-500 mt-2 font-medium">{{ __('Real-time schedule. Highlighted days indicate when the doctor is accepting consultations.') }}</p>
                     </div>
 
                     <!-- Alpine.js Dynamic Calendar -->
@@ -108,7 +119,7 @@
                         </div>
 
                         <div class="grid grid-cols-7 gap-2 mb-4">
-                            <template x-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']">
+                            <template x-for="day in [__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')]">
                                 <div class="text-center text-xs font-black text-gray-400 uppercase tracking-wider" x-text="day"></div>
                             </template>
                         </div>
@@ -147,7 +158,7 @@
             year: new Date().getFullYear(),
             workingDays: {!! $workingDaysJson !!},
             days: [],
-            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthNames: [__('January'), __('February'), __('March'), __('April'), __('May'), __('June'), __('July'), __('August'), __('September'), __('October'), __('November'), __('December')],
             
             initCalendar() {
                 let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();

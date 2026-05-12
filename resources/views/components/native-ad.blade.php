@@ -7,7 +7,7 @@
     
     <!-- Sponsored Tag -->
     <div class="absolute top-2 left-2 z-10">
-        <span class="bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">Sponsored Offer</span>
+        <span class="bg-yellow-400 text-yellow-900 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{{ __('Sponsored Offer') }}</span>
     </div>
 
     <!-- Image -->
@@ -24,7 +24,7 @@
             @if($ad->new_price)
                 <div class="font-black text-emerald-600">${{ $ad->new_price }}</div>
             @else
-                <div class="text-xs font-bold text-[#0062B8]">Learn More</div>
+                <div class="text-xs font-bold text-[#0062B8]">{{ __('Learn More') }}</div>
             @endif
             <x-heroicon-m-arrow-right class="w-4 h-4 text-[#0062B8] group-hover:translate-x-1 transition-transform" />
         </div>

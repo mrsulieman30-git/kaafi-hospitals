@@ -5,7 +5,7 @@
         <div class="container mx-auto px-4 max-w-4xl py-4 flex items-center justify-between">
             <a href="{{ $post->type === 'ad' ? '/offers' : '/posts' }}" class="flex items-center text-sm font-bold text-gray-500 hover:text-[#0062B8] transition-colors group">
                 <x-heroicon-m-arrow-left class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-                Back to {{ $post->type === 'ad' ? 'Offers' : 'Articles' }}
+                {{ __('Back to') }} {{ $post->type === 'ad' ? __('Offers') : __('Articles') }}
             </a>
             
             <div class="flex gap-3">
@@ -16,31 +16,31 @@
         </div>
     </div>
 
-    <!-- Article Header -->
-    <div class="container mx-auto px-4 max-w-4xl pt-12 pb-8">
-        <div class="flex items-center gap-3 mb-6">
+    <!-- Sleek, Compact Article Header -->
+    <div class="container mx-auto px-4 max-w-4xl pt-6 pb-2">
+        <div class="flex flex-wrap items-center gap-2 mb-2">
             @if($post->type === 'ad')
-                <span class="bg-red-100 text-red-700 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">Special Offer</span>
+                <span class="bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-sm">{{ __('Special Offer') }}</span>
             @else
-                <span class="bg-emerald-100 text-emerald-700 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">Healthcare</span>
+                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-sm">{{ __('Healthcare') }}</span>
             @endif
-            <span class="text-sm text-gray-500 font-medium">{{ $post->created_at->format('F j, Y') }}</span>
+            <span class="text-xs text-gray-400 font-bold">{{ $post->created_at->format('M j, Y') }}</span>
         </div>
         
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-6 tracking-tight">
+        <h1 class="text-2xl md:text-3xl font-black text-[#003B73] leading-snug mb-3">
             {{ $post->title }}
         </h1>
         
-        <p class="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed mb-10 border-l-4 border-[#0062B8] pl-6">
+        <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 border-l-[3px] border-[#0062B8] pl-3">
             {{ $post->excerpt }}
         </p>
 
         @if($post->type === 'ad' && $post->new_price)
-            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 flex items-center justify-center gap-6 shadow-xl mb-10 max-w-md">
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 flex items-center gap-4 shadow-md mb-6 max-w-sm">
                 @if($post->old_price)
-                    <div class="text-gray-400 font-bold text-2xl line-through">${{ $post->old_price }}</div>
+                    <div class="text-gray-400 font-bold text-lg line-through">${{ $post->old_price }}</div>
                 @endif
-                <div class="text-emerald-500 font-black text-5xl">${{ $post->new_price }}</div>
+                <div class="text-emerald-500 font-black text-3xl">${{ $post->new_price }}</div>
             </div>
         @endif
     </div>
@@ -94,7 +94,7 @@
             <!-- SMART AI BUTTON -->
             <button onclick="window.dispatchEvent(new CustomEvent('open-ai-chat-context', { detail: { type: '{{ $post->type === 'ad' ? 'offer' : 'article' }}', id: {{ $post->id }} } }))" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003B73] text-white px-8 py-4 rounded-full font-black shadow-lg hover:bg-[#0062B8] transition-colors cursor-pointer hover:scale-105 active:scale-95 border-none outline-none">
                 <x-heroicon-s-sparkles class="w-5 h-5" />
-                Discuss with AI
+                {{ __('Discuss with AI') }}
             </button>
         </div>
         

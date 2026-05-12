@@ -6,6 +6,7 @@
         // Filament often stores files in an array during the temporary upload state
         if (is_array($file)) {
             $file = array_values($file)[0] ?? null;
+            if (!$file) return null;
         }
         
         if (is_string($file)) {
@@ -13,7 +14,15 @@
         }
         
         if (is_object($file) && method_exists($file, 'temporaryUrl')) {
-            return $file->temporaryUrl();
+            try {
+                return $file->temporaryUrl();
+            } catch (\Throwable $e) {
+                // If the file can't generate a preview URL, try the stored path
+                if (method_exists($file, 'getFilename')) {
+                    return asset('storage/' . $file->getFilename());
+                }
+                return null;
+            }
         }
         
         return null;
@@ -43,7 +52,7 @@
     <div class="relative h-64 bg-[#0062B8] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         @if($heroBgSrc)
             <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-300 mix-blend-overlay" 
-                 style="background-image: url('{{ $heroBgSrc }}'); opacity: {{ ($hero_bg_opacity ?? 10) / 100 }};">
+                 style="background-image: url('{{ $heroBgSrc }}'); opacity: {{ floatval($hero_bg_opacity ?? 10) / 100 }};">
             </div>
         @endif
         

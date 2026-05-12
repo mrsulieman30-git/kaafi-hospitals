@@ -32,8 +32,8 @@
             
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
-                    <span class="inline-block bg-blue-50 text-[#0062B8] text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">Health Insights</span>
-                    <h2 class="text-3xl md:text-4xl font-black text-[#003B73] tracking-tight">Latest Medical News</h2>
+                    <span class="inline-block bg-blue-50 text-[#0062B8] text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">{{ __('Health Insights') }}</span>
+                    <h2 class="text-3xl md:text-4xl font-black text-[#003B73] tracking-tight">{{ __('Latest Medical News') }}</h2>
                 </div>
                 <div class="flex items-center gap-2">
                     <button class="blog-prev w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-200 text-[#003B73] hover:bg-[#0062B8] hover:text-white transition-colors focus:outline-none">
@@ -42,7 +42,7 @@
                     <button class="blog-next w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-200 text-[#003B73] hover:bg-[#0062B8] hover:text-white transition-colors focus:outline-none">
                         <x-heroicon-m-chevron-right class="w-6 h-6" />
                     </button>
-                    <a href="/posts" class="ml-2 text-sm font-bold text-[#0062B8] hover:text-[#003B73] hidden sm:block">View All</a>
+                    <a href="/posts" class="ml-2 text-sm font-bold text-[#0062B8] hover:text-[#003B73] hidden sm:block">{{ __('View All') }}</a>
                 </div>
             </div>
 
@@ -64,13 +64,13 @@
                                     <h3 class="text-lg font-black text-gray-900 leading-tight mb-2 group-hover:text-[#0062B8] transition-colors line-clamp-2">{{ $post->title }}</h3>
                                     <p class="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 font-medium">{{ $post->excerpt }}</p>
                                     <div class="mt-auto flex items-center pt-3 border-t border-gray-50 text-[#0062B8] text-sm font-bold group-hover:text-emerald-500 transition-colors">
-                                        Read <x-heroicon-m-arrow-right class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                                        {{ __('Read') }} <x-heroicon-m-arrow-right class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </div>
                             </a>
                         </div>
                     @empty
-                        <div class="w-full text-center py-12 text-gray-500 font-medium">More health articles coming soon.</div>
+                        <div class="w-full text-center py-12 text-gray-500 font-medium">{{ __('More health articles coming soon.') }}</div>
                     @endforelse
                 </div>
             </div>

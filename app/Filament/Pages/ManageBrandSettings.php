@@ -2,7 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\SiteSetting;
+use App\Models\Setting;
+use App\Services\SettingsService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -22,12 +23,16 @@ class ManageBrandSettings extends Page implements Forms\Contracts\HasForms
 
     public ?array $data = [];
 
-    public function mount(): void
+    public function mount(SettingsService $settingsService): void
     {
-        $settings = SiteSetting::first();
-        if ($settings) {
-            $this->form->fill($settings->toArray());
-        }
+        // Load existing settings from the key-value table by known brand keys
+        $brandKeys = [
+            'logo_path', 'logo_height', 'logo_position',
+            'hero_bg_path', 'hero_bg_opacity',
+            'chatbot_avatar_path', 'location_coordinates',
+        ];
+        $settings = Setting::whereIn('key', $brandKeys)->pluck('value', 'key')->toArray();
+        $this->form->fill($settings);
     }
 
     public function form(Form $form): Form
@@ -106,7 +111,14 @@ class ManageBrandSettings extends Page implements Forms\Contracts\HasForms
                                             ->clickable(true)
                                             ->draggable(true)
                                             ->showMarker(true)
-                                            ->markerColor('#003B73'),
+                                            ->markerColor('#003B73')
+                                            ->tilesUrl('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}')
+                                            ->afterStateHydrated(function ($state, $component) {
+                                                if (is_string($state) && !empty($state)) {
+                                                    $component->state(json_decode($state, true));
+                                                }
+                                            })
+                                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? json_encode($state) : $state),
                                     ]),
                             ])->columnSpan(1),
 
@@ -133,23 +145,19 @@ class ManageBrandSettings extends Page implements Forms\Contracts\HasForms
             ->statePath('data');
     }
 
-    public function save(): void
+    public function save(SettingsService $settingsService): void
     {
-        $settings = SiteSetting::first();
-        if ($settings) {
-            $state = $this->form->getState();
-            
-            $settings->update([
-                'logo_path'           => $state['logo_path'] ?? null,
-                'logo_height'         => $state['logo_height'] ?? 40,
-                'logo_position'       => $state['logo_position'] ?? 'left',
-                'hero_bg_path'        => $state['hero_bg_path'] ?? null,
-                'hero_bg_opacity'     => $state['hero_bg_opacity'] ?? 10,
-                'chatbot_avatar_path' => $state['chatbot_avatar_path'] ?? null,
-                'location_coordinates' => $state['location_coordinates'] ?? null,
-            ]);
+        $data = $this->form->getState();
 
-            Notification::make()->success()->title('Brand settings successfully updated!')->send();
+        foreach ($data as $key => $value) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
         }
+
+        $settingsService->clearCache();
+
+        Notification::make()->success()->title('Brand settings successfully updated!')->send();
     }
 }

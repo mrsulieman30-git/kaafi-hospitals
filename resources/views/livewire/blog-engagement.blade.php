@@ -7,7 +7,7 @@
                 <span class="w-10 h-10 rounded-full flex items-center justify-center transition {{ $hasLiked ? 'bg-red-50 text-[#DC3545]' : 'bg-gray-100 text-gray-500 group-hover:bg-red-50 group-hover:text-[#DC3545]' }}">
                     <svg class="w-5 h-5" fill="{{ $hasLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                 </span>
-                <span class="font-semibold text-sm {{ $hasLiked ? 'text-[#DC3545]' : 'text-gray-600' }}">{{ $post->likes_count }} {{ $post->likes_count === 1 ? 'Like' : 'Likes' }}</span>
+                <span class="font-semibold text-sm {{ $hasLiked ? 'text-[#DC3545]' : 'text-gray-600' }}">{{ $post->likes_count }} {{ $post->likes_count === 1 ? __('Like') : __('Likes') }}</span>
             </button>
 
             {{-- Comment Toggle --}}
@@ -15,13 +15,13 @@
                 <span class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-[#0062B8] text-gray-500 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                 </span>
-                <span class="font-semibold text-sm text-gray-600">{{ $comments->count() }} {{ $comments->count() === 1 ? 'Comment' : 'Comments' }}</span>
+                <span class="font-semibold text-sm text-gray-600">{{ $comments->count() }} {{ $comments->count() === 1 ? __('Comment') : __('Comments') }}</span>
             </button>
         </div>
 
         {{-- Share Buttons --}}
         <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500 mr-2 hidden sm:inline">Share:</span>
+            <span class="text-sm text-gray-500 mr-2 hidden sm:inline">{{ __('Share:') }}</span>
             {{-- Facebook --}}
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank" rel="noopener" class="w-9 h-9 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:opacity-80 transition" title="Share on Facebook">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -45,34 +45,34 @@
     @if($commentSubmitted)
     <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-8 flex items-center">
         <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <p class="text-green-800 text-sm font-medium">Thank you! Your comment has been submitted and is awaiting moderation.</p>
+        <p class="text-green-800 text-sm font-medium">{{ __('Thank you! Your comment has been submitted and is awaiting moderation.') }}</p>
     </div>
     @endif
 
     {{-- Comment Form --}}
     @if($showCommentForm)
     <div class="bg-gray-50 rounded-2xl p-6 mb-10 border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Leave a Comment</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ __('Leave a Comment') }}</h3>
         <form wire:submit="submitComment">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                    <input wire:model="commentName" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition" placeholder="John Doe" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Your Name') }}</label>
+                    <input wire:model="commentName" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition" placeholder="{{ __('Your Name') }}" required>
                     @error('commentName') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input wire:model="commentEmail" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition" placeholder="you@example.com" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email Address') }}</label>
+                    <input wire:model="commentEmail" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition" placeholder="{{ __('Email Address') }}" required>
                     @error('commentEmail') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Your Comment</label>
-                <textarea wire:model="commentContent" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition resize-none" placeholder="Write your thoughts..." required></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Your Comment') }}</label>
+                <textarea wire:model="commentContent" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0062B8] focus:border-[#0062B8] outline-none transition resize-none" placeholder="{{ __('Write your thoughts...') }}" required></textarea>
                 @error('commentContent') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
             <button type="submit" class="bg-[#003B73] hover:bg-[#0062B8] text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm">
-                Submit Comment
+                {{ __('Submit Comment') }}
             </button>
         </form>
     </div>
@@ -81,7 +81,7 @@
     {{-- Approved Comments --}}
     @if($comments->count() > 0)
     <div class="mb-10">
-        <h3 class="text-xl font-bold text-gray-900 mb-6">Comments ({{ $comments->count() }})</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('Comments') }} ({{ $comments->count() }})</h3>
         <div class="space-y-6">
             @foreach($comments as $comment)
             <div class="flex space-x-4">

@@ -104,7 +104,7 @@
             <div x-show="isOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0" @click.away="isOpen = false" class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
                 
                 <!-- Close AD FOREVER (Until 3 refreshes) -->
-                <button @click="closeAd()" class="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors" title="Dismiss Offer">
+                <button @click="closeAd()" class="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors" title="{{ __('Dismiss Offer') }}">
                     <x-heroicon-m-x-mark class="w-5 h-5" />
                 </button>
 
@@ -112,7 +112,7 @@
                     <img src="{{ $latestAd->display_image }}" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                     <div class="absolute bottom-4 left-6">
-                        <span class="bg-red-500 text-white text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg border border-red-400">Limited Time Offer</span>
+                        <span class="bg-red-500 text-white text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg border border-red-400">{{ __('Limited Time Offer') }}</span>
                     </div>
                 </div>
 
@@ -131,11 +131,11 @@
 
                     <div class="flex flex-col gap-3">
                         <a href="/posts/{{ $latestAd->slug }}" class="w-full bg-[#0062B8] text-white font-black py-4 rounded-2xl shadow-lg hover:bg-[#003B73] transition-colors text-lg">
-                            Claim Offer Now
+                            {{ __('Claim Offer Now') }}
                         </a>
                         <!-- Minimize Back to Bubble -->
                         <button @click="isOpen = false" class="text-gray-400 text-sm font-bold hover:text-gray-600 mt-2">
-                            Remind me later
+                            {{ __('Remind me later') }}
                         </button>
                     </div>
                 </div>

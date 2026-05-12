@@ -20,17 +20,134 @@ class BookAppointment extends Component
     public $patient_phone = '';
     public $appointment_date = '';
     public $appointment_time = '';
+    public $available_times = [];
+    public $allowed_days = [];
     
     public $successMessage = '';
 
+    /**
+     * Mount the component.
+     * The $doctor parameter comes from the route /book-appointment/{doctor?}
+     */
     public function mount($doctor = null)
     {
         $this->doctors = Doctor::where('is_active', true)->with('department')->get();
         
-        // Auto-select the doctor if they clicked the button from the grid!
+        // Try to get the doctor ID from the route parameter
+        $doctorId = null;
+        
         if ($doctor) {
-            $this->doctor_id = $doctor;
+            if ($doctor instanceof Doctor) {
+                $doctorId = $doctor->id;
+            } elseif (is_numeric($doctor)) {
+                $doctorId = (int) $doctor;
+            } else {
+                $found = Doctor::where('slug', $doctor)->first();
+                if ($found) {
+                    $doctorId = $found->id;
+                }
+            }
         }
+        
+        // Fallback: check the route parameter directly
+        if (!$doctorId) {
+            $routeParam = request()->route('doctor');
+            if ($routeParam) {
+                if ($routeParam instanceof Doctor) {
+                    $doctorId = $routeParam->id;
+                } elseif (is_numeric($routeParam)) {
+                    $doctorId = (int) $routeParam;
+                }
+            }
+        }
+        
+        if ($doctorId) {
+            $this->doctor_id = (string) $doctorId;
+            $this->loadDoctorSchedule();
+        }
+    }
+
+    public function selectDate($dateStr)
+    {
+        $this->appointment_date = $dateStr;
+        $this->appointment_time = '';
+        $this->loadTimeSlotsForDate();
+    }
+
+    /**
+     * When the user changes the doctor dropdown.
+     */
+    public function updatedDoctorId()
+    {
+        // Reset date and time when doctor changes
+        $this->appointment_date = '';
+        $this->appointment_time = '';
+        $this->available_times = [];
+        $this->loadDoctorSchedule();
+    }
+
+
+    /**
+     * When the user picks a date from the calendar (fallback if set() works).
+     */
+    public function updatedAppointmentDate()
+    {
+        $this->appointment_time = '';
+        $this->loadTimeSlotsForDate();
+    }
+
+    /**
+     * Load the doctor's working days so the calendar knows which days to enable.
+     */
+    private function loadDoctorSchedule()
+    {
+        $this->allowed_days = [];
+
+        if (empty($this->doctor_id)) {
+            $this->dispatch('allowed-days-updated', $this->allowed_days);
+            return;
+        }
+
+        $doctor = Doctor::find($this->doctor_id);
+        if (!$doctor) {
+            $this->dispatch('allowed-days-updated', $this->allowed_days);
+            return;
+        }
+
+        $schedules = $doctor->schedules()->where('is_active', true)->get();
+        
+        foreach ($schedules as $schedule) {
+            $days = is_array($schedule->day_of_week) 
+                ? $schedule->day_of_week 
+                : (json_decode($schedule->day_of_week, true) ?? []);
+            
+            foreach ($days as $day) {
+                if (!in_array($day, $this->allowed_days)) {
+                    $this->allowed_days[] = $day;
+                }
+            }
+        }
+
+        $this->dispatch('allowed-days-updated', $this->allowed_days);
+    }
+
+    /**
+     * Load available time slots for the selected doctor + date.
+     */
+    private function loadTimeSlotsForDate()
+    {
+        $this->available_times = [];
+
+        if (empty($this->doctor_id) || empty($this->appointment_date)) {
+            return;
+        }
+
+        $doctor = Doctor::find($this->doctor_id);
+        if (!$doctor) {
+            return;
+        }
+
+        $this->available_times = $doctor->getAvailableTimeSlots($this->appointment_date);
     }
 
     public function submitAppointment()

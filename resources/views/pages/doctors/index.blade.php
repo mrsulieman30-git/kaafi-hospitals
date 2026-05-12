@@ -1,10 +1,31 @@
 @extends('layouts.app')
 @section('title', 'Our Doctors - KAAFI Hospitals')
 @section('content')
-<div class="bg-kaafi-light py-16">
-    <div class="container mx-auto px-4 text-center">
-        <h1 class="text-4xl font-bold text-kaafi-navy">Our Expert Doctors</h1>
-        <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Meet our team of experienced medical professionals.</p>
+<div class="relative bg-gradient-to-br from-[#003B73] via-[#0062B8] to-[#003B73] py-12 overflow-hidden shadow-lg">
+    <!-- Abstract Background Pattern -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl"></div>
+
+    <div class="container mx-auto px-4 relative z-10 text-center">
+        <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-sm uppercase">
+            Our <span class="text-blue-300">Doctors</span>
+        </h1>
+        <p class="mt-3 text-blue-100 text-sm md:text-base font-bold tracking-widest uppercase opacity-80">WORLD-CLASS MEDICAL SPECIALISTS</p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+            <div class="h-1.5 w-12 bg-white/20 rounded-full"></div>
+            <div class="h-1.5 w-4 bg-[#DC3545] rounded-full"></div>
+            <div class="h-1.5 w-12 bg-white/20 rounded-full"></div>
+        </div>
     </div>
 </div>
 <div class="container mx-auto px-4 py-16">

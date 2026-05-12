@@ -11,9 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use Filament\Resources\Concerns\Translatable;
 
 class PageResource extends Resource
 {
+    use Translatable;
+
     protected static ?string $model = Page::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';

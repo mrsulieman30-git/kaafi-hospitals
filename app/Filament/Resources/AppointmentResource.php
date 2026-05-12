@@ -43,19 +43,42 @@ class AppointmentResource extends Resource
                                     )
                                     ->required()
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->live(),
                                     
                                 Forms\Components\DatePicker::make('appointment_date')
                                     ->required()
                                     ->native(false)
-                                    ->minDate(today()),
+                                    ->minDate(today())
+                                    ->disabledDates(function (Forms\Get $get) {
+                                        $doctorId = $get('doctor_id');
+                                        if (!$doctorId) return [];
+                                        $doctor = \App\Models\Doctor::find($doctorId);
+                                        return $doctor ? $doctor->getDisabledDatesForNextDays(90) : [];
+                                    })
+                                    ->live(),
                                     
-                                Forms\Components\TimePicker::make('appointment_time')
+                                Forms\Components\Select::make('appointment_time')
                                     ->required()
-                                    ->datalist([
-                                        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-                                        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-                                    ]),
+                                    ->options(function (Forms\Get $get) {
+                                        $doctorId = $get('doctor_id');
+                                        $date = $get('appointment_date');
+                                        
+                                        if (!$doctorId || !$date) {
+                                            return [];
+                                        }
+                                        
+                                        $doctor = \App\Models\Doctor::find($doctorId);
+                                        if (!$doctor) return [];
+                                        
+                                        $slots = $doctor->getAvailableTimeSlots($date);
+                                        $formatted = [];
+                                        foreach ($slots as $time) {
+                                            $formatted[$time] = \Carbon\Carbon::parse($time)->format('h:i A');
+                                        }
+                                        return $formatted;
+                                    })
+                                    ->searchable(),
                                     
                                 Forms\Components\Textarea::make('notes')
                                     ->columnSpanFull()

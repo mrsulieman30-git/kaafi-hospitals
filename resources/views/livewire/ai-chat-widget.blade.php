@@ -51,8 +51,8 @@
                         <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-[#004A8B] rounded-full"></div>
                     </div>
                     <div>
-                        <h3 class="font-black text-lg leading-tight tracking-tight">KAAFI Assistant</h3>
-                        <p class="text-xs text-blue-200 font-medium">Smart Scheduling & Support</p>
+                        <h3 class="font-black text-lg leading-tight tracking-tight">{{ __('KAAFI Assistant') }}</h3>
+                        <p class="text-xs text-blue-200 font-medium">{{ __('Smart Scheduling & Support') }}</p>
                     </div>
                 </div>
                 <!-- Close Button -->
@@ -95,13 +95,13 @@
                 
                 <div class="flex gap-2 overflow-x-auto p-3 custom-scrollbar hide-scrollbar-arrows bg-gray-50/50 border-b border-gray-50">
                     <button wire:click="useShortcut('I would like to book an appointment.')" class="flex-shrink-0 bg-white border border-gray-200 text-[#003B73] hover:border-[#0062B8] hover:bg-blue-50 text-xs font-bold px-4 py-2 rounded-full transition-colors whitespace-nowrap">
-                        📅 Book Appointment
+                        📅 {{ __('Book Appointment') }}
                     </button>
                     <button wire:click="useShortcut('What departments do you have?')" class="flex-shrink-0 bg-white border border-gray-200 text-[#003B73] hover:border-[#0062B8] hover:bg-blue-50 text-xs font-bold px-4 py-2 rounded-full transition-colors whitespace-nowrap">
-                        🏥 Find Department
+                        🏥 {{ __('Find Department') }}
                     </button>
                     <button wire:click="useShortcut('Search your blog for healthy heart tips.')" class="flex-shrink-0 bg-white border border-gray-200 text-[#003B73] hover:border-[#0062B8] hover:bg-blue-50 text-xs font-bold px-4 py-2 rounded-full transition-colors whitespace-nowrap">
-                        ❤️ Health Tips
+                        ❤️ {{ __('Health Tips') }}
                     </button>
                 </div>
 
@@ -109,7 +109,7 @@
                 <form wire:submit.prevent="sendMessage" class="p-4 relative flex items-end gap-2">
                     <textarea 
                         wire:model="userInput" 
-                        placeholder="Type your question..." 
+                        placeholder="{{ __('Type your question...') }}" 
                         rows="1"
                         x-on:keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); $wire.sendMessage(); $el.style.height = '48px'; }"
                         @input="$el.style.height = '48px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px'"

@@ -1,17 +1,7 @@
 @php
-    $getLocalizedString = function($field) {
-        if (empty($field)) return '';
-        if (is_array($field)) return $field['en'] ?? ($field['so'] ?? 'Unknown');
-        if (is_string($field) && str_starts_with(trim($field), '{')) {
-            $decoded = json_decode($field, true);
-            return $decoded['en'] ?? ($decoded['so'] ?? $field);
-        }
-        return $field;
-    };
-
-    $docName = $getLocalizedString($this->doctor->name);
-    $deptName = $this->doctor->department ? $getLocalizedString($this->doctor->department->name) : 'General Medicine';
-    $speciality = $this->doctor->specialization ? $getLocalizedString($this->doctor->specialization) : $deptName;
+    $docName = $this->doctor->localized_name;
+    $deptName = $this->doctor->department ? $this->doctor->department->localized_name : 'General Medicine';
+    $speciality = $this->doctor->specialization ? $this->doctor->localized_bio : $deptName; // Fallback to bio if specialization not found or using bio as specialization
 @endphp
 
 <!-- PUSH TO HEAD: WhatsApp, Facebook, and Twitter Link Preview Cards -->
@@ -84,12 +74,12 @@
         <div class="container mx-auto px-4 max-w-5xl py-4 flex justify-between items-center">
             <a href="/doctors" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-[#0062B8] transition-colors group">
                 <x-heroicon-m-arrow-left class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-                Back to All Doctors
+                {{ __('Back to All Doctors') }}
             </a>
             
             <!-- Quick Share Button -->
-            <button onclick="navigator.clipboard.writeText(window.location.href); alert('Doctor profile link copied to clipboard!');" class="text-xs font-bold text-[#0062B8] bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1">
-                <x-heroicon-o-share class="w-4 h-4" /> Share Profile
+            <button onclick="navigator.clipboard.writeText(window.location.href); alert('{{ __('Doctor profile link copied to clipboard!') }}');" class="text-xs font-bold text-[#0062B8] bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1">
+                <x-heroicon-o-share class="w-4 h-4" /> {{ __('Share Profile') }}
             </button>
         </div>
     </div>
@@ -112,7 +102,7 @@
                         </span>
                         @if($this->doctor->is_active)
                         <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-2 py-1 bg-emerald-50 rounded-md">
-                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Available
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> {{ __('Available') }}
                         </span>
                         @endif
                     </div>
@@ -132,13 +122,13 @@
                 <div class="mb-8 bg-gray-50 border border-gray-100 rounded-2xl p-5">
                     <div class="flex items-center gap-2 mb-3">
                         <x-heroicon-s-clock class="w-4 h-4 text-blue-400" />
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Weekly Schedule</h4>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Weekly Schedule') }}</h4>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @foreach(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
                             @php $isWorking = in_array($day, $this->workingDays); @endphp
                             <div class="px-3 py-1.5 rounded-xl text-xs font-black border transition-all {{ $isWorking ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-100 border-gray-200 text-gray-300' }}">
-                                {{ substr($day, 0, 3) }}
+                                {{ __(substr($day, 0, 3)) }}
                             </div>
                         @endforeach
                     </div>
@@ -148,11 +138,11 @@
                 <!-- Description / Bio -->
                 <div class="mb-10 flex-1">
                     <h3 class="text-[#003B73] font-black text-sm uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <span class="w-4 h-[2px] bg-blue-500"></span> Professional Bio
+                        <span class="w-4 h-[2px] bg-blue-500"></span> {{ __('Professional Bio') }}
                     </h3>
                     <div class="text-gray-600 leading-relaxed text-lg">
-                        @if($this->doctor->bio)
-                            {!! nl2br(e($getLocalizedString($this->doctor->bio))) !!}
+                        @if($this->doctor->localized_bio)
+                            {!! $this->doctor->localized_bio !!}
                         @else
                             {{ $seoDescription }}
                         @endif
@@ -161,13 +151,13 @@
 
                 <!-- Call to action -->
                 <div class="pt-8 border-t border-gray-100">
-                    <a href="{{ route('book.appointment', $this->doctor->id) }}" class="group relative inline-flex w-full md:w-auto items-center justify-center gap-3 bg-[#0062B8] text-white px-10 py-5 rounded-2xl font-black shadow-xl shadow-blue-900/20 hover:bg-[#003B73] hover:shadow-2xl hover:shadow-blue-900/40 transition-all transform hover:-translate-y-1 text-xl overflow-hidden">
+                    <a href="{{ route('book.appointment', $this->doctor->id) }}" class="group relative inline-flex w-full md:w-auto items-center justify-center gap-3 bg-red-600 text-white px-10 py-5 rounded-2xl font-black shadow-xl shadow-red-900/20 hover:bg-red-700 hover:shadow-2xl hover:shadow-red-900/40 transition-all transform hover:-translate-y-1 text-xl overflow-hidden">
                         <span class="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></span>
                         <x-heroicon-o-calendar-days class="w-6 h-6" />
-                        Book Appointment
+                        {{ __('Book Appointment') }}
                     </a>
                     <p class="text-center md:text-left text-xs text-gray-400 mt-4 font-medium italic">
-                        * Immediate confirmation once reception reviews your request.
+                        * {{ __('Immediate confirmation once reception reviews your request.') }}
                     </p>
                 </div>
             </div>

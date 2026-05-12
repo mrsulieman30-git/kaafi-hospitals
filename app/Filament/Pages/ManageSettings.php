@@ -41,6 +41,9 @@ class ManageSettings extends Page
                                     ->label('Hospital Name')
                                     ->required()
                                     ->default('KAAFI Hospitals'),
+                                Forms\Components\TextInput::make('city_name')
+                                    ->label('City Name')
+                                    ->default('Mogadishu'),
                                 Forms\Components\Textarea::make('hospital_address')
                                     ->label('Main Address')
                                     ->rows(3),
@@ -59,6 +62,10 @@ class ManageSettings extends Page
                                 Forms\Components\TextInput::make('contact_email')
                                     ->label('Primary Email')
                                     ->email(),
+                                Forms\Components\TextInput::make('whatsapp_number')
+                                    ->label('WhatsApp Number (with country code)')
+                                    ->tel()
+                                    ->placeholder('+252610000000'),
                             ]),
                         Forms\Components\Tabs\Tab::make('Social Links')
                             ->schema([
@@ -71,6 +78,22 @@ class ManageSettings extends Page
                                 Forms\Components\TextInput::make('instagram_url')
                                     ->label('Instagram URL')
                                     ->url(),
+                                Forms\Components\TextInput::make('tiktok_url')
+                                    ->label('TikTok URL')
+                                    ->url(),
+                            ]),
+                        Forms\Components\Tabs\Tab::make('Gallery')
+                            ->icon('heroicon-m-photo')
+                            ->schema([
+                                Forms\Components\FileUpload::make('about_gallery')
+                                    ->label('About Us Gallery')
+                                    ->helperText('Upload and reorder photos for the About Us gallery.')
+                                    ->multiple()
+                                    ->image()
+                                    ->directory('gallery')
+                                    ->reorderable()
+                                    ->appendFiles()
+                                    ->imageEditor(),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -86,7 +109,7 @@ class ManageSettings extends Page
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
-                ['value' => $value, 'type' => 'text', 'group' => 'general']
+                ['value' => $value]
             );
         }
 
