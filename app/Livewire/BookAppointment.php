@@ -19,6 +19,8 @@ class BookAppointment extends Component
     public $doctor_id = '';
     public $patient_name = '';
     public $patient_phone = '';
+    public $patient_email = '';
+    public $department_id = '';
     public $notes = '';
     public $appointment_date = '';
     public $appointment_time = '';
@@ -27,10 +29,13 @@ class BookAppointment extends Component
     public $available_times = [];
     public $allowed_days = [];
     public $successMessage = '';
+    public $selectedDoctor = null;
+    public $departments = [];
 
     public function mount($doctor = null)
     {
         $this->doctors = Doctor::where('is_active', true)->with('department')->get();
+        $this->departments = \App\Models\Department::all();
         
         $doctorId = null;
         if ($doctor) {
@@ -53,6 +58,10 @@ class BookAppointment extends Component
         
         if ($doctorId) {
             $this->doctor_id = (string) $doctorId;
+            $this->selectedDoctor = Doctor::with('department')->find($doctorId);
+            if ($this->selectedDoctor) {
+                $this->department_id = (string) $this->selectedDoctor->department_id;
+            }
             $this->loadDoctorSchedule();
         }
     }
@@ -62,6 +71,10 @@ class BookAppointment extends Component
         $this->appointment_date = '';
         $this->appointment_time = '';
         $this->available_times = [];
+        $this->selectedDoctor = Doctor::with('department')->find($this->doctor_id);
+        if ($this->selectedDoctor) {
+            $this->department_id = (string) $this->selectedDoctor->department_id;
+        }
         $this->loadDoctorSchedule();
     }
 
@@ -164,6 +177,8 @@ class BookAppointment extends Component
             'doctor_id' => 'required|exists:doctors,id',
             'patient_name' => 'required|string|max:255',
             'patient_phone' => 'required|string|min:9',
+            'patient_email' => 'nullable|email|max:255',
+            'department_id' => 'required|exists:departments,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
         ]);
@@ -179,7 +194,7 @@ class BookAppointment extends Component
                 $patient = new User();
                 $patient->name = $this->patient_name;
                 $patient->phone = $formattedPhone;
-                $patient->email = 'patient_' . uniqid() . '@kaafihospitals.so'; 
+                $patient->email = $this->patient_email ?: 'patient_' . uniqid() . '@kaafihospitals.so'; 
                 $patient->password = Hash::make('0' . $rawPhone);
                 $patient->save();
 
@@ -194,7 +209,7 @@ class BookAppointment extends Component
 
             $appointment = new Appointment();
             $appointment->user_id = $patient->id;
-            $appointment->department_id = $doctor->department_id ?? null;
+            $appointment->department_id = $this->department_id;
             $appointment->doctor_id = $doctor->id;
             $appointment->appointment_date = $this->appointment_date;
             $appointment->appointment_time = Carbon::parse($this->appointment_time)->format('H:i:s');
@@ -204,13 +219,14 @@ class BookAppointment extends Component
 
             $this->successMessage = "Appointment requested successfully! You can track it in the Patient Portal. Username: 0{$rawPhone} | Password: 0{$rawPhone}";
             
-            $this->reset(['patient_name', 'patient_phone', 'notes', 'appointment_date', 'appointment_time', 'available_times']);
+            $this->reset(['patient_name', 'patient_phone', 'patient_email', 'department_id', 'notes', 'appointment_date', 'appointment_time', 'available_times']);
             $this->dispatch('reset-calendar');
         });
     }
 
     public function render()
     {
-        return view('livewire.book-appointment')->layout('layouts.app');
+        return view('livewire.book-appointment')
+            ->layout('layouts.app', ['title' => 'Book Appointment']);
     }
 }
