@@ -48,8 +48,8 @@
                     </div>
                     
                     <div class="pt-20 pb-10 px-8 text-center">
-                        <h1 class="text-3xl font-black text-gray-900 mb-1">{{ $doctor->name }}</h1>
-                        <p class="text-lg font-bold text-[#0062B8] mb-4">{{ $doctor->title }}</p>
+                        <h1 class="text-3xl font-black text-gray-900 mb-1">{{ $doctor->localized_name }}</h1>
+                        <p class="text-xl font-bold text-emerald-600 mb-6">{{ $doctor->localized_title }}</p>
                         
                         <div class="inline-flex items-center gap-2 bg-sky-50 text-sky-700 px-4 py-2 rounded-xl text-sm font-semibold mb-8">
                             <x-heroicon-o-building-office class="w-5 h-5" />

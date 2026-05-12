@@ -110,11 +110,9 @@
                     <h1 class="text-3xl md:text-5xl font-black text-[#003B73] mb-2 tracking-tight leading-tight">
                         {{ $docName }}
                     </h1>
-                    @if($this->doctor->specialization)
-                        <h2 class="text-xl text-gray-500 font-medium italic">
-                            {{ $speciality }}
-                        </h2>
-                    @endif
+                    <h2 class="text-xl md:text-2xl font-bold text-emerald-600 mb-6">
+                        {{ $this->doctor->localized_title }}
+                    </h2>
                 </div>
 
                 <!-- Live Schedule Display -->

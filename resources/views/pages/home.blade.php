@@ -79,6 +79,88 @@
         </div>
     </div>
 
+    <!-- Hospital Milestones Section -->
+    <section class="py-24 bg-white overflow-hidden" id="milestones-section">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-5xl font-black text-[#003B73] mb-6">{{ __('Hospital Milestones') }}</h2>
+                <div class="h-1.5 w-24 bg-[#DC3545] mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+                @php
+                    $milestones = [
+                        ['id' => 'years', 'target' => intval(preg_replace('/[^0-9]/', '', $siteSettings->get('stats_years', '8'))), 'label' => __('Years of Experience'), 'suffix' => '+'],
+                        ['id' => 'patients', 'target' => intval(preg_replace('/[^0-9]/', '', $siteSettings->get('stats_patients', '107250'))), 'label' => __('Total Patients Treated'), 'suffix' => ''],
+                        ['id' => 'beds', 'target' => intval(preg_replace('/[^0-9]/', '', $siteSettings->get('stats_beds', '35'))), 'label' => __('Number of Beds'), 'suffix' => '+'],
+                        ['id' => 'surgeries', 'target' => intval(preg_replace('/[^0-9]/', '', $siteSettings->get('stats_surgeries', '1700'))), 'label' => __('Successful Surgeries'), 'suffix' => '+'],
+                    ];
+                @endphp
+
+                @foreach($milestones as $stat)
+                    <div class="relative group p-10 bg-gray-50 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-sm text-[#0062B8] mb-6 group-hover:scale-110 group-hover:bg-[#0062B8] group-hover:text-white transition-all duration-500">
+                            @if($stat['id'] == 'years') <x-heroicon-o-calendar class="w-8 h-8" />
+                            @elseif($stat['id'] == 'patients') <x-heroicon-o-users class="w-8 h-8" />
+                            @elseif($stat['id'] == 'beds') <x-heroicon-o-home-modern class="w-8 h-8" />
+                            @elseif($stat['id'] == 'surgeries') <x-heroicon-o-heart class="w-8 h-8" />
+                            @endif
+                        </div>
+                        
+                        <div class="text-4xl md:text-5xl font-black text-[#003B73] mb-3 flex items-center justify-center gap-0.5">
+                            <span class="counter" data-target="{{ $stat['target'] }}">0</span>
+                            <span class="text-[#DC3545]">{{ $stat['suffix'] }}</span>
+                        </div>
+                        
+                        <div class="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest">{{ $stat['label'] }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 200;
+
+            const startCounters = () => {
+                counters.forEach(counter => {
+                    const updateCount = () => {
+                        const target = +counter.getAttribute('data-target');
+                        const text = counter.innerText.replace(/,/g, '');
+                        const count = +text;
+                        const inc = Math.ceil(target / speed);
+
+                        if (count < target) {
+                            counter.innerText = (count + inc).toLocaleString();
+                            setTimeout(updateCount, 1);
+                        } else {
+                            counter.innerText = target.toLocaleString();
+                        }
+                    };
+                    updateCount();
+                });
+            };
+
+            const observerOptions = {
+                threshold: 0.5
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        startCounters();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const section = document.querySelector('#milestones-section');
+            if (section) observer.observe(section);
+        });
+    </script>
+
     <!-- Our Doctors Section -->
     <div class="bg-gray-50 py-20 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,13 +179,17 @@
                     <div class="h-64 overflow-hidden relative">
                         <img class="w-full h-full object-cover object-top" src="{{ $doctor->display_image }}" alt="{{ $doctor->localized_name }}">
                         <div class="absolute bottom-0 w-full bg-gradient-to-t from-[#003B73] to-transparent h-1/2 opacity-70"></div>
-                        <div class="absolute bottom-4 left-4 text-white font-semibold">
-                            {{ $doctor->department->localized_name ?? __('Specialist') }}
+                        <div class="absolute bottom-4 left-4">
+                            <span class="bg-[#003B73] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-lg border border-white/10 uppercase tracking-widest">
+                                {{ $doctor->department->localized_name ?? __('Specialist') }}
+                            </span>
                         </div>
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900">{{ $doctor->localized_name }}</h3>
-                        <p class="text-[#0062B8] font-medium mt-1">{{ $doctor->localized_title }}</p>
+                        <p class="text-sm font-bold text-emerald-600 line-clamp-1 uppercase tracking-wide">
+                            {{ $doctor->localized_title }}
+                        </p>
                         
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <a href="{{ route('doctors.profile', $doctor->id) }}" class="text-[#0062B8] hover:text-blue-800 font-semibold flex items-center">
@@ -124,4 +210,39 @@
     </div>
     <!-- Latest Health Insights Section -->
     <livewire:home-latest-blog />
+
+    <!-- Accepted Insurance Providers Section -->
+    <section class="py-16 bg-gray-50 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="text-center md:text-left shrink-0">
+                    <h2 class="text-2xl font-black text-[#003B73] mb-2">{{ __('Accepted Insurance Providers') }}</h2>
+                    <div class="h-1 w-20 bg-emerald-500 mx-auto md:mx-0 rounded-full"></div>
+                </div>
+                
+                <div class="flex flex-wrap justify-center items-center gap-4">
+                    @php
+                        $providers = $siteSettings->get('insurance_providers', [
+                            ['name' => 'CIGNA'],
+                            ['name' => 'Amana'],
+                            ['name' => 'Takaful'],
+                            ['name' => 'Kobciye'],
+                        ]);
+                    @endphp
+                    @foreach($providers as $provider)
+                        <div class="bg-white px-8 py-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center min-w-[140px] group hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                            @if(!empty($provider['logo']))
+                                <img src="{{ asset('storage/' . $provider['logo']) }}" alt="{{ $provider['name'] }}" class="h-8 object-contain">
+                            @else
+                                <div class="flex flex-col items-center">
+                                    <span class="text-lg font-black text-[#0062B8] tracking-tighter group-hover:text-[#003B73] transition-colors">{{ $provider['name'] }}</span>
+                                    <span class="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">Insurance</span>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
 @endsection

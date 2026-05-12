@@ -34,7 +34,7 @@ class DoctorProfile extends Component
     {
         $docName = $this->doctor->localized_name;
         $deptName = $this->doctor->department ? $this->doctor->department->localized_name : 'General Medicine';
-        $speciality = $this->doctor->localized_bio ?: $deptName; // Using bio as a fallback for specialization if needed
+        $speciality = $this->doctor->localized_title ?: $deptName; 
         $hospitalName = 'KAAFI Hospitals';
 
         // Title format: Doctor's Name + Hospital Name + Department

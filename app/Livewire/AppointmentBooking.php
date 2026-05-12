@@ -203,6 +203,9 @@ class AppointmentBooking extends Component
 
             Appointment::create([
                 'user_id' => $patient->id,
+                'patient_name' => $this->patient_name,
+                'patient_phone' => $formattedPhone,
+                'patient_email' => $this->patient_email,
                 'department_id' => $this->department_id,
                 'doctor_id' => $this->doctor_id,
                 'appointment_date' => $this->selectedDate,

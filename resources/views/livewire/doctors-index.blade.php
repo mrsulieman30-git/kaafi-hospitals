@@ -59,7 +59,7 @@
                         
                         <!-- Department Badge -->
                         <div class="absolute bottom-4 left-4 right-4">
-                            <span class="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30 shadow-sm">
+                            <span class="inline-block bg-[#003B73] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-md border border-white/10 uppercase tracking-widest">
                                 {{ $doctor->department ? $doctor->department->localized_name : __('General Medicine') }}
                             </span>
                         </div>
@@ -71,8 +71,8 @@
                             <h3 class="text-xl font-black text-[#003B73] mb-1 line-clamp-1">
                                 {{ $doctor->localized_name }}
                             </h3>
-                            <p class="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-4 line-clamp-1">
-                                {{ $doctor->department ? $doctor->department->localized_name : __('Specialist') }}
+                            <p class="text-sm font-bold text-emerald-600 mb-4 line-clamp-1 uppercase tracking-wide">
+                                {{ $doctor->localized_title }}
                             </p>
                         </div>
 

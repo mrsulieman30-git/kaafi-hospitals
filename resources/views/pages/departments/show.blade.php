@@ -75,8 +75,10 @@
                             <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-white shadow-sm">
                                 <img src="{{ $doctor->display_image }}" alt="{{ $doctor->localized_name }}" class="w-full h-full object-cover">
                             </div>
-                            <h3 class="font-bold text-gray-900">{{ $doctor->localized_name }}</h3>
-                            <p class="text-xs font-bold text-[#0062B8] mb-4 uppercase tracking-wider">{{ $doctor->localized_title }}</p>
+                            <h3 class="font-bold text-gray-900 leading-tight mb-1">{{ $doctor->localized_name }}</h3>
+                            <p class="text-[11px] font-bold text-emerald-600 line-clamp-1 mb-4 uppercase tracking-wide">
+                                {{ $doctor->localized_title }}
+                            </p>
                             <a href="{{ route('doctors.profile', $doctor->id) }}" class="inline-flex items-center justify-center w-full text-xs font-bold text-white bg-[#0062B8] py-2.5 rounded-xl hover:bg-[#003B73] transition-all">
                                 {{ __('View Profile') }}
                             </a>

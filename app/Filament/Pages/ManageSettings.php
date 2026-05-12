@@ -53,12 +53,27 @@ class ManageSettings extends Page
                             ]),
                         Forms\Components\Tabs\Tab::make('Contact Info')
                             ->schema([
-                                Forms\Components\TextInput::make('contact_phone')
-                                    ->label('Primary Phone Number')
-                                    ->tel(),
                                 Forms\Components\TextInput::make('emergency_phone')
-                                    ->label('Emergency Phone Number')
-                                    ->tel(),
+                                    ->label('Emergency Hotline')
+                                    ->helperText('This number is shown prominently in the top menu.')
+                                    ->tel()
+                                    ->required()
+                                    ->prefixIcon('heroicon-m-phone-arrow-up-right'),
+                                Forms\Components\Repeater::make('additional_phones')
+                                    ->label('Additional Contact Numbers')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('number')
+                                            ->label('Phone Number')
+                                            ->tel()
+                                            ->required(),
+                                        Forms\Components\TextInput::make('label')
+                                            ->label('Label (optional)')
+                                            ->placeholder('e.g. Reception, Pharmacy'),
+                                    ])
+                                    ->collapsible()
+                                    ->defaultItems(0)
+                                    ->reorderable()
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
                                 Forms\Components\TextInput::make('contact_email')
                                     ->label('Primary Email')
                                     ->email(),
@@ -94,6 +109,50 @@ class ManageSettings extends Page
                                     ->reorderable()
                                     ->appendFiles()
                                     ->imageEditor(),
+                            ]),
+                        Forms\Components\Tabs\Tab::make('Milestones')
+                            ->icon('heroicon-m-chart-bar')
+                            ->schema([
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('stats_years')
+                                            ->label('Years of Experience')
+                                            ->default('8')
+                                            ->suffix('+'),
+                                        Forms\Components\TextInput::make('stats_patients')
+                                            ->label('Total Patients Treated')
+                                            ->default('107,250'),
+                                        Forms\Components\TextInput::make('stats_beds')
+                                            ->label('Number of Beds')
+                                            ->default('35')
+                                            ->suffix('+'),
+                                        Forms\Components\TextInput::make('stats_surgeries')
+                                            ->label('Successful Surgeries')
+                                            ->default('1700')
+                                            ->suffix('+'),
+                                    ]),
+                            ]),
+                        Forms\Components\Tabs\Tab::make('Insurance')
+                            ->icon('heroicon-m-shield-check')
+                            ->schema([
+                                Forms\Components\Repeater::make('insurance_providers')
+                                    ->label('Accepted Insurance Providers')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->required()
+                                            ->label('Provider Name'),
+                                        Forms\Components\FileUpload::make('logo')
+                                            ->label('Provider Logo (Optional)')
+                                            ->image()
+                                            ->directory('insurance'),
+                                    ])
+                                    ->default([
+                                        ['name' => 'CIGNA'],
+                                        ['name' => 'Amana'],
+                                        ['name' => 'Takaful'],
+                                        ['name' => 'Kobciye'],
+                                    ])
+                                    ->collapsible(),
                             ]),
                     ])
                     ->columnSpanFull(),
