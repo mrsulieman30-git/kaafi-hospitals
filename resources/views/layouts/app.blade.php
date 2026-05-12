@@ -35,28 +35,7 @@
     @livewireStyles
     
     <!-- Tailwind CSS (CDN for quick dev, will use Vite for prod) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        kaafi: {
-                            navy: '#003B73',
-                            blue: '#0062B8',
-                            red: '#DC3545',
-                            green: '#28A745',
-                            light: '#E8F4FD',
-                            gray: '#F8F9FA'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+   
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="font-sans antialiased text-gray-800 bg-white overflow-x-hidden">

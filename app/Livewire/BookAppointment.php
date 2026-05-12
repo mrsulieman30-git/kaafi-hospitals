@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Doctor;
 use App\Models\Appointment;
+use App\Models\DoctorSchedule;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -18,24 +19,20 @@ class BookAppointment extends Component
     public $doctor_id = '';
     public $patient_name = '';
     public $patient_phone = '';
+    public $notes = '';
     public $appointment_date = '';
     public $appointment_time = '';
+    
+    // UI State
     public $available_times = [];
     public $allowed_days = [];
-    
     public $successMessage = '';
 
-    /**
-     * Mount the component.
-     * The $doctor parameter comes from the route /book-appointment/{doctor?}
-     */
     public function mount($doctor = null)
     {
         $this->doctors = Doctor::where('is_active', true)->with('department')->get();
         
-        // Try to get the doctor ID from the route parameter
         $doctorId = null;
-        
         if ($doctor) {
             if ($doctor instanceof Doctor) {
                 $doctorId = $doctor->id;
@@ -43,21 +40,14 @@ class BookAppointment extends Component
                 $doctorId = (int) $doctor;
             } else {
                 $found = Doctor::where('slug', $doctor)->first();
-                if ($found) {
-                    $doctorId = $found->id;
-                }
+                if ($found) $doctorId = $found->id;
             }
         }
         
-        // Fallback: check the route parameter directly
         if (!$doctorId) {
             $routeParam = request()->route('doctor');
             if ($routeParam) {
-                if ($routeParam instanceof Doctor) {
-                    $doctorId = $routeParam->id;
-                } elseif (is_numeric($routeParam)) {
-                    $doctorId = (int) $routeParam;
-                }
+                $doctorId = $routeParam instanceof Doctor ? $routeParam->id : (int) $routeParam;
             }
         }
         
@@ -67,6 +57,14 @@ class BookAppointment extends Component
         }
     }
 
+    public function updatedDoctorId()
+    {
+        $this->appointment_date = '';
+        $this->appointment_time = '';
+        $this->available_times = [];
+        $this->loadDoctorSchedule();
+    }
+
     public function selectDate($dateStr)
     {
         $this->appointment_date = $dateStr;
@@ -74,43 +72,23 @@ class BookAppointment extends Component
         $this->loadTimeSlotsForDate();
     }
 
-    /**
-     * When the user changes the doctor dropdown.
-     */
-    public function updatedDoctorId()
+    public function selectTime($time)
     {
-        // Reset date and time when doctor changes
-        $this->appointment_date = '';
-        $this->appointment_time = '';
-        $this->available_times = [];
-        $this->loadDoctorSchedule();
+        $this->appointment_time = $time;
     }
 
-
-    /**
-     * When the user picks a date from the calendar (fallback if set() works).
-     */
-    public function updatedAppointmentDate()
-    {
-        $this->appointment_time = '';
-        $this->loadTimeSlotsForDate();
-    }
-
-    /**
-     * Load the doctor's working days so the calendar knows which days to enable.
-     */
     private function loadDoctorSchedule()
     {
         $this->allowed_days = [];
 
         if (empty($this->doctor_id)) {
-            $this->dispatch('allowed-days-updated', $this->allowed_days);
+            $this->dispatch('update-allowed-days', days: $this->allowed_days);
             return;
         }
 
         $doctor = Doctor::find($this->doctor_id);
         if (!$doctor) {
-            $this->dispatch('allowed-days-updated', $this->allowed_days);
+            $this->dispatch('update-allowed-days', days: $this->allowed_days);
             return;
         }
 
@@ -128,12 +106,10 @@ class BookAppointment extends Component
             }
         }
 
-        $this->dispatch('allowed-days-updated', $this->allowed_days);
+        // Dispatch precisely for Livewire 3
+        $this->dispatch('update-allowed-days', days: $this->allowed_days);
     }
 
-    /**
-     * Load available time slots for the selected doctor + date.
-     */
     private function loadTimeSlotsForDate()
     {
         $this->available_times = [];
@@ -142,12 +118,44 @@ class BookAppointment extends Component
             return;
         }
 
-        $doctor = Doctor::find($this->doctor_id);
-        if (!$doctor) {
-            return;
+        $date = Carbon::parse($this->appointment_date);
+        $dayName = $date->format('l');
+
+        $schedules = DoctorSchedule::where('doctor_id', $this->doctor_id)
+            ->where('is_active', true)
+            ->get();
+
+        $activeSchedule = null;
+        foreach ($schedules as $schedule) {
+            $days = is_array($schedule->day_of_week) ? $schedule->day_of_week : (json_decode($schedule->day_of_week, true) ?? []);
+            if (in_array($dayName, $days)) {
+                $activeSchedule = $schedule;
+                break;
+            }
         }
 
-        $this->available_times = $doctor->getAvailableTimeSlots($this->appointment_date);
+        if (!$activeSchedule || !$activeSchedule->start_time || !$activeSchedule->end_time) return;
+
+        $startTime = Carbon::parse($activeSchedule->start_time);
+        $endTime = Carbon::parse($activeSchedule->end_time);
+
+        $bookedAppointments = Appointment::where('doctor_id', $this->doctor_id)
+            ->whereDate('appointment_date', $this->appointment_date)
+            ->whereIn('status', ['pending', 'approved', 'confirmed'])
+            ->pluck('appointment_time')
+            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
+            ->toArray();
+
+        while ($startTime->lessThan($endTime)) {
+            $timeString = $startTime->format('H:i');
+            
+            if (!in_array($timeString, $bookedAppointments)) {
+                if (!($date->isToday() && $startTime->isPast())) {
+                    $this->available_times[] = $timeString;
+                }
+            }
+            $startTime->addMinutes(30);
+        }
     }
 
     public function submitAppointment()
@@ -161,14 +169,12 @@ class BookAppointment extends Component
         ]);
 
         DB::transaction(function () {
-            // Format phone number to +252 exactly like the AI logic
             $rawPhone = preg_replace('/[^0-9]/', '', $this->patient_phone); 
             $rawPhone = ltrim($rawPhone, '0');
             $formattedPhone = '+252' . $rawPhone;
 
             $patient = User::where('phone', $formattedPhone)->first();
 
-            // Create patient account if they don't exist, using phone without country code as password
             if (!$patient) {
                 $patient = new User();
                 $patient->name = $this->patient_name;
@@ -178,8 +184,7 @@ class BookAppointment extends Component
                 $patient->save();
 
                 if (class_exists(\Spatie\Permission\Models\Role::class)) {
-                    $roleExists = \Spatie\Permission\Models\Role::where('name', 'Patient')->exists();
-                    if ($roleExists) {
+                    if (\Spatie\Permission\Models\Role::where('name', 'Patient')->exists()) {
                         $patient->assignRole('Patient');
                     }
                 }
@@ -187,7 +192,6 @@ class BookAppointment extends Component
 
             $doctor = Doctor::find($this->doctor_id);
 
-            // Create Appointment
             $appointment = new Appointment();
             $appointment->user_id = $patient->id;
             $appointment->department_id = $doctor->department_id ?? null;
@@ -195,13 +199,13 @@ class BookAppointment extends Component
             $appointment->appointment_date = $this->appointment_date;
             $appointment->appointment_time = Carbon::parse($this->appointment_time)->format('H:i:s');
             $appointment->status = 'pending';
-            $appointment->notes = 'Booked via Web Form';
+            $appointment->notes = empty($this->notes) ? 'Booked via Web Form' : $this->notes;
             $appointment->save();
 
             $this->successMessage = "Appointment requested successfully! You can track it in the Patient Portal. Username: 0{$rawPhone} | Password: 0{$rawPhone}";
             
-            // Reset form
-            $this->reset(['patient_name', 'patient_phone', 'appointment_date', 'appointment_time']);
+            $this->reset(['patient_name', 'patient_phone', 'notes', 'appointment_date', 'appointment_time', 'available_times']);
+            $this->dispatch('reset-calendar');
         });
     }
 

@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register the SettingsService as a singleton so it is only resolved once per request
         $this->app->singleton(SettingsService::class, function ($app) {
             return new SettingsService();
         });
@@ -24,10 +25,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share the settings service with all Blade views automatically
-        // You can now use $siteSettings->get('hospital_name') anywhere in your frontend
-        View::composer('*', function ($view) {
-            $view->with('siteSettings', app(SettingsService::class));
-        });
+        Schema::defaultStringLength(191);
+
+        // Force HTTPS in production to fix insecure content warnings
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
+
+        View::share('siteSettings', app(SettingsService::class));
     }
 }

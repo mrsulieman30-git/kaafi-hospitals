@@ -67,10 +67,9 @@ Route::get('/blog/{slug}', function ($slug) {
 Route::get('/offers', \App\Livewire\OffersIndex::class)->name('offers.index');
 
 // ── Appointment ──────────────────────────────────────────────
-Route::get('/appointment', function () {
-    return view('pages.appointment.index');
-});
-
+// Unify both booking routes to point to the exact same premium Livewire component
+Route::get('/appointment', \App\Livewire\BookAppointment::class)->name('appointment.index');
+Route::get('/book-appointment/{doctor?}', \App\Livewire\BookAppointment::class)->name('book.appointment');
 // ── Sitemap ──────────────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
     $doctors = Doctor::where('is_active', true)->get();
