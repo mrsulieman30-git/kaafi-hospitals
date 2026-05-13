@@ -3,234 +3,209 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 use App\Models\Doctor;
 use App\Models\Appointment;
-use App\Models\DoctorSchedule;
-use App\Models\User;
 use App\Models\Department;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class BookAppointment extends Component
 {
-    // Form Fields
-    public $doctor_id = '';
+    // Workflow State
+    public $currentStep = 1; // 1: Doctor, 2: Date, 3: Time (Popup), 4: Patient Info, 5: Summary (Popup)
+    
+    // Selection Data
+    public $selectedDoctorId = null;
+    public $selectedDate = null;
+    public $selectedTime = null;
+    
+    // Patient Information
     public $patient_name = '';
     public $patient_phone = '';
     public $patient_email = '';
-    public $department_id = '';
     public $notes = '';
-    public $appointment_date = '';
-    public $appointment_time = '';
-    
-    // UI State
-    public $available_times = [];
-    public $allowed_days = [];
+
+    // UI Data
+    public $showTimeModal = false;
+    public $showSummaryModal = false;
     public $successMessage = '';
-    public $selectedDoctor = null;
+
+    protected $rules = [
+        'patient_name' => 'required|string|min:3|max:255',
+        'patient_phone' => 'required|string|min:8',
+        'patient_email' => 'nullable|email',
+    ];
 
     public function mount($doctor = null)
     {
-        $doctorId = null;
         if ($doctor) {
-            if ($doctor instanceof Doctor) {
-                $doctorId = $doctor->id;
-            } elseif (is_numeric($doctor)) {
-                $doctorId = (int) $doctor;
+            $found = null;
+            if (is_numeric($doctor)) {
+                $found = Doctor::find($doctor);
             } else {
                 $found = Doctor::where('slug', $doctor)->first();
-                if ($found) $doctorId = $found->id;
             }
-        }
-        
-        if (!$doctorId) {
-            $routeParam = request()->route('doctor');
-            if ($routeParam) {
-                $doctorId = $routeParam instanceof Doctor ? $routeParam->id : (int) $routeParam;
+
+            if ($found) {
+                $this->selectDoctor($found->id);
             }
-        }
-        
-        if ($doctorId) {
-            $this->selectDoctor($doctorId);
         }
     }
 
-    #[Computed]
-    public function doctors()
-    {
-        return Doctor::where('is_active', true)->with('department')->get();
-    }
-
-    #[Computed]
-    public function departments()
-    {
-        return Department::all();
-    }
+    // --- Workflow Methods ---
 
     public function selectDoctor($id)
     {
-        $this->doctor_id = (string) $id;
-        $this->appointment_date = '';
-        $this->appointment_time = '';
-        $this->available_times = [];
+        $this->selectedDoctorId = $id;
+        $this->selectedDate = null;
+        $this->selectedTime = null;
+        $this->currentStep = 2;
         
-        $this->selectedDoctor = Doctor::with('department')->find($this->doctor_id);
-        
-        if ($this->selectedDoctor) {
-            $this->department_id = (string) $this->selectedDoctor->department_id;
-            $this->loadDoctorSchedule();
-        }
-
-        $this->dispatch('close-doctor-dropdown');
+        // Reset modals
+        $this->showTimeModal = false;
+        $this->showSummaryModal = false;
     }
 
-    public function updatedDoctorId()
+    public function selectDate($date)
     {
-        $this->selectDoctor($this->doctor_id);
-    }
-
-    public function selectDate($dateStr)
-    {
-        $this->appointment_date = $dateStr;
-        $this->appointment_time = '';
-        $this->loadTimeSlotsForDate();
+        $this->selectedDate = $date;
+        $this->selectedTime = null;
+        $this->showTimeModal = true;
     }
 
     public function selectTime($time)
     {
-        $this->appointment_time = $time;
+        $this->selectedTime = $time;
+        $this->showTimeModal = false;
+        $this->currentStep = 4;
     }
 
-    private function loadDoctorSchedule()
+    public function proceedToSummary()
     {
-        $this->allowed_days = [];
-
-        if (empty($this->doctor_id) || !$this->selectedDoctor) {
-            $this->dispatch('update-allowed-days', days: $this->allowed_days);
-            return;
-        }
-
-        $schedules = $this->selectedDoctor->schedules()->where('is_active', true)->get();
-        
-        foreach ($schedules as $schedule) {
-            $days = is_array($schedule->day_of_week) 
-                ? $schedule->day_of_week 
-                : (json_decode($schedule->day_of_week, true) ?? []);
-            
-            foreach ($days as $day) {
-                if (!in_array($day, $this->allowed_days)) {
-                    $this->allowed_days[] = $day;
-                }
-            }
-        }
-
-        $this->dispatch('update-allowed-days', days: $this->allowed_days);
+        $this->validate();
+        $this->showSummaryModal = true;
     }
 
-    private function loadTimeSlotsForDate()
+    public function confirmAppointment()
     {
-        $this->available_times = [];
-
-        if (empty($this->doctor_id) || empty($this->appointment_date)) {
-            return;
-        }
-
-        $date = Carbon::parse($this->appointment_date);
-        $dayName = $date->format('l');
-
-        $schedules = DoctorSchedule::where('doctor_id', $this->doctor_id)
-            ->where('is_active', true)
-            ->get();
-
-        $activeSchedule = null;
-        foreach ($schedules as $schedule) {
-            $days = is_array($schedule->day_of_week) ? $schedule->day_of_week : (json_decode($schedule->day_of_week, true) ?? []);
-            if (in_array($dayName, $days)) {
-                $activeSchedule = $schedule;
-                break;
-            }
-        }
-
-        if (!$activeSchedule || !$activeSchedule->start_time || !$activeSchedule->end_time) return;
-
-        $startTime = Carbon::parse($activeSchedule->start_time);
-        $endTime = Carbon::parse($activeSchedule->end_time);
-
-        $bookedAppointments = Appointment::where('doctor_id', $this->doctor_id)
-            ->whereDate('appointment_date', $this->appointment_date)
-            ->whereIn('status', ['pending', 'approved', 'confirmed'])
-            ->pluck('appointment_time')
-            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
-            ->toArray();
-
-        while ($startTime->lessThan($endTime)) {
-            $timeString = $startTime->format('H:i');
-            
-            if (!in_array($timeString, $bookedAppointments)) {
-                if (!($date->isToday() && $startTime->isPast())) {
-                    $this->available_times[] = $timeString;
-                }
-            }
-            $startTime->addMinutes(30);
-        }
-    }
-
-    public function submitAppointment()
-    {
-        $this->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'patient_name' => 'required|string|max:255',
-            'patient_phone' => 'required|string|min:9',
-            'patient_email' => 'nullable|email|max:255',
-            'department_id' => 'required|exists:departments,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
-            'appointment_time' => 'required',
-        ]);
+        $this->validate();
 
         DB::transaction(function () {
-            $rawPhone = preg_replace('/[^0-9]/', '', $this->patient_phone); 
-            $rawPhone = ltrim($rawPhone, '0');
-            $formattedPhone = '+252' . $rawPhone;
+            // Find or create user based on phone
+            $formattedPhone = $this->formatPhoneNumber($this->patient_phone);
+            $user = User::where('phone', $formattedPhone)->first();
 
-            $patient = User::where('phone', $formattedPhone)->first();
-
-            if (!$patient) {
-                $patient = new User();
-                $patient->name = $this->patient_name;
-                $patient->phone = $formattedPhone;
-                $patient->email = $this->patient_email ?: 'patient_' . uniqid() . '@kaafihospitals.so'; 
-                $patient->password = Hash::make('0' . $rawPhone);
-                $patient->save();
-
+            if (!$user) {
+                $user = User::create([
+                    'name' => $this->patient_name,
+                    'phone' => $formattedPhone,
+                    'email' => $this->patient_email ?: 'patient_' . uniqid() . '@kaafihospitals.so',
+                    'password' => Hash::make($this->patient_phone),
+                ]);
+                
+                // Assign Patient role if exists
                 if (class_exists(\Spatie\Permission\Models\Role::class)) {
-                    if (\Spatie\Permission\Models\Role::where('name', 'Patient')->exists()) {
-                        $patient->assignRole('Patient');
-                    }
+                    $role = \Spatie\Permission\Models\Role::where('name', 'Patient')->first();
+                    if ($role) $user->assignRole($role);
                 }
             }
 
-            $appointment = new Appointment();
-            $appointment->user_id = $patient->id;
-            $appointment->department_id = $this->department_id;
-            $appointment->doctor_id = $this->doctor_id;
-            $appointment->appointment_date = $this->appointment_date;
-            $appointment->appointment_time = Carbon::parse($this->appointment_time)->format('H:i:s');
-            $appointment->status = 'pending';
-            $appointment->notes = empty($this->notes) ? 'Booked via Web Form' : $this->notes;
-            $appointment->save();
+            $doctor = Doctor::find($this->selectedDoctorId);
 
-            $this->successMessage = "Appointment requested successfully! You can track it in the Patient Portal. Username: 0{$rawPhone} | Password: 0{$rawPhone}";
-            
-            $this->reset(['patient_name', 'patient_phone', 'patient_email', 'department_id', 'notes', 'appointment_date', 'appointment_time', 'available_times', 'selectedDoctor', 'doctor_id']);
-            $this->dispatch('reset-calendar');
+            Appointment::create([
+                'user_id' => $user->id,
+                'doctor_id' => $this->selectedDoctorId,
+                'department_id' => $doctor->department_id,
+                'patient_name' => $this->patient_name,
+                'patient_phone' => $formattedPhone,
+                'patient_email' => $this->patient_email,
+                'appointment_date' => $this->selectedDate,
+                'appointment_time' => Carbon::parse($this->selectedTime)->format('H:i:s'),
+                'notes' => $this->notes ?: 'Booked via simplified web form',
+                'status' => 'pending',
+            ]);
         });
+
+        $this->successMessage = __('Booking Successful! Our team will contact you shortly.');
+        $this->currentStep = 1;
+        $this->reset(['selectedDoctorId', 'selectedDate', 'selectedTime', 'patient_name', 'patient_phone', 'patient_email', 'notes', 'showSummaryModal']);
+    }
+
+    public function goToStep($step)
+    {
+        $this->currentStep = $step;
+        if ($step < 3) $this->showTimeModal = false;
+        if ($step < 5) $this->showSummaryModal = false;
+    }
+
+    // --- Helpers ---
+
+    private function formatPhoneNumber($phone)
+    {
+        $raw = preg_replace('/[^0-9]/', '', $phone);
+        $raw = ltrim($raw, '0');
+        if (str_starts_with($raw, '252')) return '+' . $raw;
+        return '+252' . $raw;
+    }
+
+    public function getDoctorsProperty()
+    {
+        return Doctor::with('department')->where('is_active', true)->get()->map(function($doctor) {
+            // Generate deterministic "random" rating based on ID
+            $doctor->rating = 4.5 + (($doctor->id * 7) % 5) / 10;
+            return $doctor;
+        });
+    }
+
+    public function getSelectedDoctorProperty()
+    {
+        return $this->selectedDoctorId ? Doctor::with('department')->find($this->selectedDoctorId) : null;
+    }
+
+    public function getAvailableDatesProperty()
+    {
+        if (!$this->selectedDoctorId) return [];
+
+        $doctor = Doctor::find($this->selectedDoctorId);
+        $dates = [];
+        $today = Carbon::today();
+
+        // Get working days for this doctor
+        $workingDays = [];
+        foreach ($doctor->schedules()->where('is_active', true)->get() as $sch) {
+            $days = is_array($sch->day_of_week) ? $sch->day_of_week : json_decode($sch->day_of_week, true) ?? [];
+            foreach ($days as $d) if (!in_array($d, $workingDays)) $workingDays[] = $d;
+        }
+
+        // Check next 30 days
+        for ($i = 0; $i < 30; $i++) {
+            $date = $today->copy()->addDays($i);
+            if (in_array($date->format('l'), $workingDays)) {
+                $dates[] = [
+                    'date' => $date->format('Y-m-d'),
+                    'label' => $date->format('D, M d'),
+                    'day' => $date->format('d'),
+                    'month' => $date->format('M'),
+                ];
+            }
+        }
+
+        return $dates;
+    }
+
+    public function getAvailableTimesProperty()
+    {
+        if (!$this->selectedDoctorId || !$this->selectedDate) return [];
+
+        $doctor = Doctor::find($this->selectedDoctorId);
+        return $doctor->getAvailableTimeSlots($this->selectedDate);
     }
 
     public function render()
     {
         return view('livewire.book-appointment')
-            ->layout('layouts.app', ['title' => 'Book Appointment']);
+            ->layout('layouts.app', ['title' => __('Book Appointment')]);
     }
 }
