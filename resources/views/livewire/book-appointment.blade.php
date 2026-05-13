@@ -76,7 +76,7 @@
                             <h2 class="text-xl font-bold text-[#003B73]">{{ __('Select Doctor') }}</h2>
                         </div>
 
-                        <div x-data="{ open: false }" class="relative">
+                        <div x-data="{ open: false }" @close-doctor-dropdown.window="open = false" class="relative">
                             <div @click="open = !open" :class="open ? 'border-[#0062B8]' : 'border-gray-100'" class="cursor-pointer border-2 rounded-2xl p-5 hover:border-[#0062B8]/30 transition-all bg-gray-50/50 flex items-center gap-4 group">
                                 @if($selectedDoctor)
                                     <div class="w-16 h-16 rounded-full border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
@@ -116,9 +116,8 @@
                                 <div class="p-3 bg-gray-50 border-b border-gray-100">
                                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">{{ __('Available Doctors') }}</p>
                                 </div>
-                                @foreach($doctors as $doc)
+                                @foreach($this->doctors as $doc)
                                     <div wire:key="doc-{{ $doc->id }}" 
-                                        @click="open = false"
                                         wire:click="selectDoctor({{ $doc->id }})" 
                                         class="p-4 flex items-center gap-4 hover:bg-blue-50/50 cursor-pointer border-b border-gray-50 last:border-0 transition group">
                                         <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-transparent group-hover:border-[#0062B8]/20 transition-all">
@@ -187,7 +186,7 @@
                                 <div class="relative">
                                     <select wire:model="department_id" class="w-full bg-gray-50 border-2 border-gray-50 rounded-2xl px-4 py-3.5 focus:bg-white focus:border-[#0062B8]/30 focus:ring-0 transition-all font-semibold text-gray-900 appearance-none">
                                         <option value="">-- {{ __('Select Department') }} --</option>
-                                        @foreach($departments as $dept)
+                                        @foreach($this->departments as $dept)
                                             <option value="{{ $dept->id }}">{{ $dept->getLocalizedNameAttribute() }}</option>
                                         @endforeach
                                     </select>

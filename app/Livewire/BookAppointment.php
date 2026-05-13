@@ -3,18 +3,18 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 use App\Models\Doctor;
 use App\Models\Appointment;
 use App\Models\DoctorSchedule;
 use App\Models\User;
+use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class BookAppointment extends Component
 {
-    public $doctors;
-    
     // Form Fields
     public $doctor_id = '';
     public $patient_name = '';
@@ -30,13 +30,9 @@ class BookAppointment extends Component
     public $allowed_days = [];
     public $successMessage = '';
     public $selectedDoctor = null;
-    public $departments = [];
 
     public function mount($doctor = null)
     {
-        $this->doctors = Doctor::where('is_active', true)->with('department')->get();
-        $this->departments = \App\Models\Department::all();
-        
         $doctorId = null;
         if ($doctor) {
             if ($doctor instanceof Doctor) {
@@ -57,31 +53,42 @@ class BookAppointment extends Component
         }
         
         if ($doctorId) {
-            $this->doctor_id = (string) $doctorId;
-            $this->selectedDoctor = Doctor::with('department')->find($doctorId);
-            if ($this->selectedDoctor) {
-                $this->department_id = (string) $this->selectedDoctor->department_id;
-            }
-            $this->loadDoctorSchedule();
+            $this->selectDoctor($doctorId);
         }
+    }
+
+    #[Computed]
+    public function doctors()
+    {
+        return Doctor::where('is_active', true)->with('department')->get();
+    }
+
+    #[Computed]
+    public function departments()
+    {
+        return Department::all();
     }
 
     public function selectDoctor($id)
     {
         $this->doctor_id = (string) $id;
-        $this->updatedDoctorId();
+        $this->appointment_date = '';
+        $this->appointment_time = '';
+        $this->available_times = [];
+        
+        $this->selectedDoctor = Doctor::with('department')->find($this->doctor_id);
+        
+        if ($this->selectedDoctor) {
+            $this->department_id = (string) $this->selectedDoctor->department_id;
+            $this->loadDoctorSchedule();
+        }
+
+        $this->dispatch('close-doctor-dropdown');
     }
 
     public function updatedDoctorId()
     {
-        $this->appointment_date = '';
-        $this->appointment_time = '';
-        $this->available_times = [];
-        $this->selectedDoctor = Doctor::with('department')->find($this->doctor_id);
-        if ($this->selectedDoctor) {
-            $this->department_id = (string) $this->selectedDoctor->department_id;
-        }
-        $this->loadDoctorSchedule();
+        $this->selectDoctor($this->doctor_id);
     }
 
     public function selectDate($dateStr)
@@ -100,18 +107,12 @@ class BookAppointment extends Component
     {
         $this->allowed_days = [];
 
-        if (empty($this->doctor_id)) {
+        if (empty($this->doctor_id) || !$this->selectedDoctor) {
             $this->dispatch('update-allowed-days', days: $this->allowed_days);
             return;
         }
 
-        $doctor = Doctor::find($this->doctor_id);
-        if (!$doctor) {
-            $this->dispatch('update-allowed-days', days: $this->allowed_days);
-            return;
-        }
-
-        $schedules = $doctor->schedules()->where('is_active', true)->get();
+        $schedules = $this->selectedDoctor->schedules()->where('is_active', true)->get();
         
         foreach ($schedules as $schedule) {
             $days = is_array($schedule->day_of_week) 
@@ -125,7 +126,6 @@ class BookAppointment extends Component
             }
         }
 
-        // Dispatch precisely for Livewire 3
         $this->dispatch('update-allowed-days', days: $this->allowed_days);
     }
 
@@ -211,12 +211,10 @@ class BookAppointment extends Component
                 }
             }
 
-            $doctor = Doctor::find($this->doctor_id);
-
             $appointment = new Appointment();
             $appointment->user_id = $patient->id;
             $appointment->department_id = $this->department_id;
-            $appointment->doctor_id = $doctor->id;
+            $appointment->doctor_id = $this->doctor_id;
             $appointment->appointment_date = $this->appointment_date;
             $appointment->appointment_time = Carbon::parse($this->appointment_time)->format('H:i:s');
             $appointment->status = 'pending';
@@ -225,7 +223,7 @@ class BookAppointment extends Component
 
             $this->successMessage = "Appointment requested successfully! You can track it in the Patient Portal. Username: 0{$rawPhone} | Password: 0{$rawPhone}";
             
-            $this->reset(['patient_name', 'patient_phone', 'patient_email', 'department_id', 'notes', 'appointment_date', 'appointment_time', 'available_times']);
+            $this->reset(['patient_name', 'patient_phone', 'patient_email', 'department_id', 'notes', 'appointment_date', 'appointment_time', 'available_times', 'selectedDoctor', 'doctor_id']);
             $this->dispatch('reset-calendar');
         });
     }
