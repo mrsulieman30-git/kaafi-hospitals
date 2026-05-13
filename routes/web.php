@@ -81,6 +81,10 @@ Route::get('/blog/{slug}', function ($slug) {
     return view('pages.blog.show', compact('post', 'relatedPosts'));
 })->name('blog.show');
 
+// ── Careers & Jobs ───────────────────────────────────────────
+Route::get('/careers', \App\Livewire\CareerIndex::class)->name('careers.index');
+Route::get('/jobs/{slug}', \App\Livewire\JobShow::class)->name('jobs.show');
+
 // ── Offers ──
 Route::get('/offers', \App\Livewire\OffersIndex::class)->name('offers.index');
 

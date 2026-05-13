@@ -21,9 +21,9 @@
     <div class="container mx-auto px-4 max-w-7xl">
         
         <div class="text-center mb-16">
-            <span class="inline-block bg-red-50 text-red-600 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">Special Deals</span>
-            <h1 class="text-4xl md:text-5xl font-black text-[#003B73] tracking-tight mb-4">Hospital Offers & Notices</h1>
-            <p class="text-gray-500 font-medium">Discover our latest health packages, discounts, and important updates.</p>
+            <span class="inline-block bg-red-50 text-red-600 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">{{ __('Special Deals') }}</span>
+            <h1 class="text-4xl md:text-5xl font-black text-[#003B73] tracking-tight mb-4">{{ __('Hospital Offers & Notices') }}</h1>
+            <p class="text-gray-500 font-medium">{{ __('Discover our latest health packages, discounts, and important updates.') }}</p>
         </div>
 
         <!-- 2 cols on mobile, 3 on desktop -->
@@ -56,7 +56,7 @@
                                 <span class="font-bold text-sm">{{ $offer->likes }}</span>
                             </button>
                             
-                            <a href="/posts/{{ $offer->slug }}" class="text-xs sm:text-sm font-bold text-[#0062B8] hover:text-[#003B73]">View Details &rarr;</a>
+                            <a href="/posts/{{ $offer->slug }}" class="text-xs sm:text-sm font-bold text-[#0062B8] hover:text-[#003B73]">{{ __('View Details') }} &rarr;</a>
                         </div>
                     </div>
                 </div>

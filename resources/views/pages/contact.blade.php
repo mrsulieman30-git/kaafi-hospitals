@@ -30,24 +30,7 @@
 </div>
 <div class="container mx-auto px-4 py-8">
     <div class="grid md:grid-cols-2 gap-12">
-        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
-            <h2 class="text-2xl font-bold text-kaafi-navy mb-6">Send us a message</h2>
-            <form>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2 font-medium">Name</label>
-                    <input type="text" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-kaafi-blue focus:border-kaafi-blue">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2 font-medium">Email</label>
-                    <input type="email" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-kaafi-blue focus:border-kaafi-blue">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2 font-medium">Message</label>
-                    <textarea rows="4" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-kaafi-blue focus:border-kaafi-blue"></textarea>
-                </div>
-                <button type="button" class="bg-kaafi-blue hover:bg-blue-700 text-white font-bold py-3 px-6 rounded w-full transition">Send Message</button>
-            </form>
-        </div>
+        <livewire:contact-form />
         <div>
             <h2 class="text-2xl font-bold text-kaafi-navy mb-6">Our Location</h2>
             @php
