@@ -14,11 +14,12 @@
     <meta property="og:title" content="{{ $seoTitle }}">
     <meta property="og:description" content="{{ $seoDescription }}">
     <meta property="og:image" content="{{ $this->doctor->display_image }}">
-    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:url" content="{{ request()->fullUrl() }}">
     <meta property="og:site_name" content="KAAFI Hospitals">
     
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request()->fullUrl() }}">
     <meta name="twitter:title" content="{{ $seoTitle }}">
     <meta name="twitter:description" content="{{ $seoDescription }}">
     <meta name="twitter:image" content="{{ $this->doctor->display_image }}">

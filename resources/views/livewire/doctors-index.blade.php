@@ -4,14 +4,14 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:url" content="{{ request()->fullUrl() }}">
     <meta property="og:title" content="{{ __('Our Specialists') }} | {{ config('app.name') }}">
     <meta property="og:description" content="{{ __('Meet our world-class medical team at KAAFI Hospitals. Book appointments with expert doctors and specialists across multiple departments.') }}">
     <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:url" content="{{ request()->fullUrl() }}">
     <meta property="twitter:title" content="{{ __('Our Specialists') }} | {{ config('app.name') }}">
     <meta property="twitter:description" content="{{ __('Meet our world-class medical team at KAAFI Hospitals. Book appointments with expert doctors and specialists across multiple departments.') }}">
     <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">

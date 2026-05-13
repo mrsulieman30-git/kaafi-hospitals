@@ -9,7 +9,25 @@ Route::get('/language/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'so'])) {
         session()->put('locale', $locale);
     }
-    return redirect()->back();
+    
+    // Get the previous URL
+    $previousUrl = url()->previous();
+    
+    // Remove any existing 'lang' parameter from the URL
+    $parsedUrl = parse_url($previousUrl);
+    $queryParams = [];
+    if (isset($parsedUrl['query'])) {
+        parse_str($parsedUrl['query'], $queryParams);
+    }
+    
+    // Set the new 'lang' parameter
+    $queryParams['lang'] = $locale;
+    
+    // Reconstruct the URL
+    $newQuery = http_build_query($queryParams);
+    $newUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . (isset($parsedUrl['port']) ? ':' . $parsedUrl['port'] : '') . $parsedUrl['path'] . '?' . $newQuery;
+    
+    return redirect($newUrl);
 })->name('language.switch');
 
 Route::get('/', function () {

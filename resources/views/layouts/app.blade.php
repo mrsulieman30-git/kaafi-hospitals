@@ -19,14 +19,14 @@
         
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:url" content="{{ request()->fullUrl() }}">
         <meta property="og:title" content="{{ $hospitalName }}">
         <meta property="og:description" content="{{ $hospitalDescription }}">
         <meta property="og:image" content="{{ $defaultOgImage }}">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="{{ url()->current() }}">
+        <meta property="twitter:url" content="{{ request()->fullUrl() }}">
         <meta property="twitter:title" content="{{ $hospitalName }}">
         <meta property="twitter:description" content="{{ $hospitalDescription }}">
         <meta property="twitter:image" content="{{ $defaultOgImage }}">

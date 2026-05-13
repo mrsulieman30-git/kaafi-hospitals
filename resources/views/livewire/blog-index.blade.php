@@ -4,14 +4,14 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:url" content="{{ request()->fullUrl() }}">
     <meta property="og:title" content="{{ __('KAAFI Updates') }} | {{ config('app.name') }}">
     <meta property="og:description" content="{{ __('Stay updated with the latest medical news, health tips, and hospital updates from KAAFI Hospitals.') }}">
     <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:url" content="{{ request()->fullUrl() }}">
     <meta property="twitter:title" content="{{ __('KAAFI Updates') }} | {{ config('app.name') }}">
     <meta property="twitter:description" content="{{ __('Stay updated with the latest medical news, health tips, and hospital updates from KAAFI Hospitals.') }}">
     <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
