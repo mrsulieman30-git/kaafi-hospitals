@@ -1,4 +1,22 @@
 @extends('layouts.app')
+@section('seo')
+    <title>{{ $page->title }} | {{ config('app.name') }}</title>
+    <meta name="description" content="{{ Str::limit(strip_tags($page->content), 160) }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="{{ $page->title }} | {{ config('app.name') }}">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($page->content), 160) }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:title" content="{{ $page->title }} | {{ config('app.name') }}">
+    <meta property="twitter:description" content="{{ Str::limit(strip_tags($page->content), 160) }}">
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+@endsection
 
 {{-- Use the SEO data you set in the Admin Panel --}}
 @section('title', $page->title . ' - KAAFI Hospitals')

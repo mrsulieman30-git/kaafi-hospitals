@@ -5,7 +5,7 @@
 @endphp
 
 <!-- PUSH TO HEAD: WhatsApp, Facebook, and Twitter Link Preview Cards -->
-@push('meta')
+@section('seo')
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDescription }}">
     
@@ -65,7 +65,7 @@
       }
     }
     </script>
-@endpush
+@endsection
 
 <div class="bg-gray-50 min-h-screen pb-24 font-sans">
     

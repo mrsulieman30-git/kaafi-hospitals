@@ -1,3 +1,22 @@
+@section('seo')
+    <title>{{ __('KAAFI Updates') }} | {{ config('app.name') }}</title>
+    <meta name="description" content="{{ __('Stay updated with the latest medical news, health tips, and hospital updates from KAAFI Hospitals.') }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="{{ __('KAAFI Updates') }} | {{ config('app.name') }}">
+    <meta property="og:description" content="{{ __('Stay updated with the latest medical news, health tips, and hospital updates from KAAFI Hospitals.') }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:title" content="{{ __('KAAFI Updates') }} | {{ config('app.name') }}">
+    <meta property="twitter:description" content="{{ __('Stay updated with the latest medical news, health tips, and hospital updates from KAAFI Hospitals.') }}">
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+@endsection
+
 <div class="bg-gray-50 min-h-screen pb-24 font-sans overflow-x-hidden">
     <!-- Modern Colorful Page Title -->
     <div class="relative bg-gradient-to-br from-[#003B73] via-[#0062B8] to-[#003B73] py-12 overflow-hidden shadow-lg mb-8">
@@ -33,7 +52,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
     <!-- Sleek Search Toolbar -->
-    <div class="container mx-auto px-4 max-w-4xl mb-12 -mt-14 relative z-30">
+    <div class="container mx-auto px-4 max-w-4xl mb-8 -mt-14 relative z-30">
         <div class="bg-white p-3 rounded-2xl shadow-xl border border-gray-100">
             <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -44,8 +63,28 @@
         </div>
     </div>
 
+    <!-- Category Quick Tags -->
+    <div class="container mx-auto px-4 max-w-6xl mb-12 relative z-20">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <button 
+                wire:click="selectCategory(null)"
+                class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all {{ is_null($selectedCategory) ? 'bg-[#003B73] text-white shadow-lg shadow-blue-900/20 ring-2 ring-[#003B73] ring-offset-2' : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-100 shadow-sm' }}"
+            >
+                {{ __('All Topics') }}
+            </button>
+            @foreach($categories as $category)
+                <button 
+                    wire:click="selectCategory({{ $category->id }})"
+                    class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all {{ $selectedCategory == $category->id ? 'bg-[#003B73] text-white shadow-lg shadow-blue-900/20 ring-2 ring-[#003B73] ring-offset-2' : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-100 shadow-sm' }}"
+                >
+                    {{ $getLocalizedString($category->name) }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+
     <!-- Featured Endless Carousel -->
-    @if($featuredPosts->isNotEmpty() && empty($search))
+    @if($featuredPosts->isNotEmpty() && empty($search) && is_null($selectedCategory))
         <div class="mb-16 mt-4 w-full" x-data="{
             init() {
                 new Swiper(this.$refs.featuredSlider, {
@@ -125,8 +164,10 @@
                         <div class="absolute top-2 right-2 z-10">
                             @if($post->type === 'ad')
                                 <span class="bg-red-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{{ __('Offer') }}</span>
+                            @elseif($post->category)
+                                <span class="bg-[#003B73] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{{ $getLocalizedString($post->category->name) }}</span>
                             @else
-                                <span class="bg-[#003B73] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{{ __('Article') }}</span>
+                                <span class="bg-gray-600 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{{ __('Article') }}</span>
                             @endif
                         </div>
                     </div>

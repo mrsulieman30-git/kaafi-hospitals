@@ -1,4 +1,23 @@
 @extends('layouts.app')
+@section('seo')
+    <title>{{ $department->name }} | {{ config('app.name') }}</title>
+    <meta name="description" content="{{ Str::limit(strip_tags($department->description), 160) }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="{{ $department->name }} | {{ config('app.name') }}">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($department->description), 160) }}">
+    <meta property="og:image" content="{{ $department->image ? asset('storage/' . $department->image) : asset('images/og-image.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:title" content="{{ $department->name }} | {{ config('app.name') }}">
+    <meta property="twitter:description" content="{{ Str::limit(strip_tags($department->description), 160) }}">
+    <meta property="twitter:image" content="{{ $department->image ? asset('storage/' . $department->image) : asset('images/og-image.jpg') }}">
+@endsection
+
 @section('title', $department->name . ' - KAAFI Hospitals')
 @section('content')
 <div class="bg-kaafi-light py-16">

@@ -1,3 +1,22 @@
+@section('seo')
+    <title>{{ __('Our Specialists') }} | {{ config('app.name') }}</title>
+    <meta name="description" content="{{ __('Meet our world-class medical team at KAAFI Hospitals. Book appointments with expert doctors and specialists across multiple departments.') }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="{{ __('Our Specialists') }} | {{ config('app.name') }}">
+    <meta property="og:description" content="{{ __('Meet our world-class medical team at KAAFI Hospitals. Book appointments with expert doctors and specialists across multiple departments.') }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:title" content="{{ __('Our Specialists') }} | {{ config('app.name') }}">
+    <meta property="twitter:description" content="{{ __('Meet our world-class medical team at KAAFI Hospitals. Book appointments with expert doctors and specialists across multiple departments.') }}">
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+@endsection
+
 <div class="bg-gray-50 min-h-screen pb-24 font-sans pt-8 lg:pt-12">
     
     <!-- Modern, Space-Saving Dashboard Toolbar -->

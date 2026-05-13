@@ -3,8 +3,35 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    
+    @php
+        $hospitalName = $siteSettings->get('hospital_name', 'KAAFI Hospitals');
+        $hospitalDescription = __('KAAFI Hospitals provides world-class healthcare with compassionate care and medical excellence in Somalia.');
+        $defaultOgImage = $siteSettings->get('logo_path') ? asset('storage/' . $siteSettings->get('logo_path')) : asset('images/og-image.jpg');
+    @endphp
+
+    <!-- Dynamic SEO Meta Tags -->
+    @if(View::hasSection('seo'))
+        @yield('seo')
+    @else
+        <title>{{ $hospitalName }} - {{ __('Keeping You Well') }}</title>
+        <meta name="description" content="{{ $hospitalDescription }}">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:title" content="{{ $hospitalName }}">
+        <meta property="og:description" content="{{ $hospitalDescription }}">
+        <meta property="og:image" content="{{ $defaultOgImage }}">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ url()->current() }}">
+        <meta property="twitter:title" content="{{ $hospitalName }}">
+        <meta property="twitter:description" content="{{ $hospitalDescription }}">
+        <meta property="twitter:image" content="{{ $defaultOgImage }}">
+    @endif
+    @stack('seo')
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

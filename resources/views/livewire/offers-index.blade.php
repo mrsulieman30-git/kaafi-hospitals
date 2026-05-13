@@ -1,3 +1,22 @@
+@section('seo')
+    <title>{{ __('Medical Offers') }} | {{ config('app.name') }}</title>
+    <meta name="description" content="{{ __('Explore the latest medical checkup packages and special offers at KAAFI Hospitals.') }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="{{ __('Medical Offers') }} | {{ config('app.name') }}">
+    <meta property="og:description" content="{{ __('Explore the latest medical checkup packages and special offers at KAAFI Hospitals.') }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request()->url() }}">
+    <meta property="twitter:title" content="{{ __('Medical Offers') }} | {{ config('app.name') }}">
+    <meta property="twitter:description" content="{{ __('Explore the latest medical checkup packages and special offers at KAAFI Hospitals.') }}">
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+@endsection
+
 <div class="bg-gray-50 min-h-screen pb-24 font-sans pt-12">
     <div class="container mx-auto px-4 max-w-7xl">
         
