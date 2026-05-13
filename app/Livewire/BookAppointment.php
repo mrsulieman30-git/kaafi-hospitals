@@ -15,12 +15,12 @@ class BookAppointment extends Component
 {
     // Workflow State
     public $currentStep = 1; // 1: Doctor, 2: Date, 3: Time (Popup), 4: Patient Info, 5: Summary (Popup)
-    
+
     // Selection Data
     public $selectedDoctorId = null;
     public $selectedDate = null;
     public $selectedTime = null;
-    
+
     // Patient Information
     public $patient_name = '';
     public $patient_phone = '';
@@ -31,6 +31,10 @@ class BookAppointment extends Component
     public $showTimeModal = false;
     public $showSummaryModal = false;
     public $successMessage = '';
+
+    // Month Navigation for Calendar
+    public $viewMonth;
+    public $viewYear;
 
     protected $rules = [
         'patient_name' => 'required|string|min:3|max:255',
@@ -52,6 +56,9 @@ class BookAppointment extends Component
                 $this->selectDoctor($found->id);
             }
         }
+
+        $this->viewMonth = now()->month;
+        $this->viewYear = now()->year;
     }
 
     // --- Workflow Methods ---
@@ -62,7 +69,7 @@ class BookAppointment extends Component
         $this->selectedDate = null;
         $this->selectedTime = null;
         $this->currentStep = 2;
-        
+
         // Reset modals
         $this->showTimeModal = false;
         $this->showSummaryModal = false;
@@ -104,7 +111,7 @@ class BookAppointment extends Component
                     'email' => $this->patient_email ?: 'patient_' . uniqid() . '@kaafihospitals.so',
                     'password' => Hash::make($this->patient_phone),
                 ]);
-                
+
                 // Assign Patient role if exists
                 if (class_exists(\Spatie\Permission\Models\Role::class)) {
                     $role = \Spatie\Permission\Models\Role::where('name', 'Patient')->first();
@@ -122,7 +129,7 @@ class BookAppointment extends Component
                 'patient_phone' => $formattedPhone,
                 'patient_email' => $this->patient_email,
                 'appointment_date' => $this->selectedDate,
-                'appointment_time' => Carbon::parse($this->selectedTime)->format('H:i:s'),
+                'appointment_time' => \Carbon\Carbon::parse($this->selectedTime)->format('H:i:s'),
                 'notes' => $this->notes ?: 'Booked via simplified web form',
                 'status' => 'pending',
             ]);
@@ -138,6 +145,20 @@ class BookAppointment extends Component
         $this->currentStep = $step;
         if ($step < 3) $this->showTimeModal = false;
         if ($step < 5) $this->showSummaryModal = false;
+    }
+
+    public function prevMonth()
+    {
+        $date = \Carbon\Carbon::create($this->viewYear, $this->viewMonth, 1)->subMonth();
+        $this->viewMonth = $date->month;
+        $this->viewYear = $date->year;
+    }
+
+    public function nextMonth()
+    {
+        $date = \Carbon\Carbon::create($this->viewYear, $this->viewMonth, 1)->addMonth();
+        $this->viewMonth = $date->month;
+        $this->viewYear = $date->year;
     }
 
     // --- Helpers ---
@@ -164,35 +185,41 @@ class BookAppointment extends Component
         return $this->selectedDoctorId ? Doctor::with('department')->find($this->selectedDoctorId) : null;
     }
 
-    public function getAvailableDatesProperty()
+    public function getDaysProperty()
     {
-        if (!$this->selectedDoctorId) return [];
+        $startOfMonth = \Carbon\Carbon::create($this->viewYear, $this->viewMonth, 1);
+        $daysInMonth = $startOfMonth->daysInMonth;
 
-        $doctor = Doctor::find($this->selectedDoctorId);
-        $dates = [];
-        $today = Carbon::today();
+        $days = [];
 
-        // Get working days for this doctor
-        $workingDays = [];
-        foreach ($doctor->schedules()->where('is_active', true)->get() as $sch) {
-            $days = is_array($sch->day_of_week) ? $sch->day_of_week : json_decode($sch->day_of_week, true) ?? [];
-            foreach ($days as $d) if (!in_array($d, $workingDays)) $workingDays[] = $d;
+        // Empty days at start
+        for ($i = 0; $i < $startOfMonth->dayOfWeekIso % 7; $i++) {
+            $days[] = ['date' => null, 'day' => null, 'isCurrentMonth' => false];
         }
 
-        // Check next 30 days
-        for ($i = 0; $i < 30; $i++) {
-            $date = $today->copy()->addDays($i);
-            if (in_array($date->format('l'), $workingDays)) {
-                $dates[] = [
-                    'date' => $date->format('Y-m-d'),
-                    'label' => $date->format('D, M d'),
-                    'day' => $date->format('d'),
-                    'month' => $date->format('M'),
-                ];
-            }
-        }
+        // Optimized availability check for the whole month
+        $availableDates = $this->selectedDoctor ? $this->selectedDoctor->getAvailableDatesForMonth($this->viewYear, $this->viewMonth) : [];
 
-        return $dates;
+        // Days of month
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $date = \Carbon\Carbon::create($this->viewYear, $this->viewMonth, $i);
+            $dateString = $date->toDateString();
+            $isAvailable = in_array($dateString, $availableDates);
+
+            $days[] = [
+                'date' => $dateString,
+                'day' => $i,
+                'isAvailable' => $isAvailable,
+                'isToday' => $date->isToday(),
+                'isCurrentMonth' => true
+            ];
+        }
+        return $days;
+    }
+
+    public function getViewMonthNameProperty()
+    {
+        return \Carbon\Carbon::create($this->viewYear, $this->viewMonth, 1)->translatedFormat('F Y');
     }
 
     public function getAvailableTimesProperty()
@@ -200,7 +227,7 @@ class BookAppointment extends Component
         if (!$this->selectedDoctorId || !$this->selectedDate) return [];
 
         $doctor = Doctor::find($this->selectedDoctorId);
-        return $doctor->getAvailableTimeSlots($this->selectedDate);
+        return $doctor ? $doctor->getAvailableTimeSlots($this->selectedDate) : [];
     }
 
     public function render()

@@ -229,5 +229,18 @@
     "Change Doctor": "Beddel Dhakhtarka",
     "Change Date": "Beddel Taariikhda",
     "Change Time": "Beddel Waqtiga",
-    "Available": "Waa la heli karaa"
+    "Available": "Waa la heli karaa",
+    "Booking with": "Ballan la leh",
+    "Available slots for": "Waqtiyada bannaan ee",
+    "Patient Information": "Macluumaadka Bukaanka",
+    "Full Name": "Magaca oo Buuxa",
+    "Email (Optional)": "Iimaylka (Haddii uu jiro)",
+    "Notes / Symptoms": "Faahfaahin / Calaamadaha",
+    "Briefly describe the reason for your visit...": "Si kooban u sharax sababta booqashadaada...",
+    "e.g. Ahmed Ali": "tusaale. Axmed Cali",
+    "Edit Details": "Wax ka beddel Macluumaadka",
+    "Name": "Magaca",
+    "Phone": "Taleefanka",
+    "Patient Details": "Faahfaahinta Bukaanka",
+    "Information": "Macluumaad"
 }

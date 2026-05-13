@@ -15,6 +15,72 @@ class Doctor extends Model
     public $translatable = ['name', 'bio', 'title'];
     protected $guarded = [];
 
+    /**
+     * Get all available dates for a specific month.
+     * Optimized to avoid N+1 queries in the calendar.
+     */
+    public function getAvailableDatesForMonth(int $year, int $month): array
+    {
+        $startOfMonth = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        
+        $schedules = $this->schedules()->where('is_active', true)->get();
+        if ($schedules->isEmpty()) return [];
+
+        $bookedAppointments = $this->appointments()
+            ->whereBetween('appointment_date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
+            ->where('status', '!=', 'cancelled')
+            ->get(['appointment_date', 'appointment_time']);
+
+        $availableDates = [];
+        $current = $startOfMonth->copy();
+        
+        while ($current->lte($endOfMonth)) {
+            $dayName = $current->format('l');
+            $dateString = $current->toDateString();
+            
+            $daySchedules = $schedules->filter(function($s) use ($dayName) {
+                $days = is_array($s->day_of_week) ? $s->day_of_week : json_decode($s->day_of_week, true) ?? [];
+                return in_array($dayName, $days);
+            });
+
+            if ($daySchedules->isNotEmpty()) {
+                $dayBookedTimes = $bookedAppointments->where('appointment_date', $dateString)
+                    ->pluck('appointment_time')
+                    ->map(fn($t) => \Carbon\Carbon::parse($t)->format('H:i'))
+                    ->toArray();
+
+                $hasSlot = false;
+                foreach ($daySchedules as $schedule) {
+                    $start = \Carbon\Carbon::parse($schedule->start_time);
+                    $end = \Carbon\Carbon::parse($schedule->end_time);
+                    if ($end->lte($start)) $end = \Carbon\Carbon::parse('23:59');
+
+                    while ($start->lt($end)) {
+                        $timeString = $start->format('H:i');
+                        $isFuture = !$current->isToday() || $start->isAfter(\Carbon\Carbon::now());
+                        
+                        if (!in_array($timeString, $dayBookedTimes) && $isFuture) {
+                            $hasSlot = true;
+                            break;
+                        }
+                        $start->addMinutes(30);
+                    }
+                    if ($hasSlot) break;
+                }
+                if ($hasSlot) $availableDates[] = $dateString;
+            }
+            $current->addDay();
+        }
+
+        return $availableDates;
+    }
+
+    public function isAvailableOn($date)
+    {
+        return count($this->getAvailableTimeSlots($date instanceof \Carbon\Carbon ? $date->toDateString() : $date)) > 0;
+    }
+
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -101,7 +167,7 @@ class Doctor extends Model
      */
     public function getAvailableTimeSlots(string $date, int $intervalMinutes = 30): array
     {
-        $targetDate = Carbon::parse($date);
+        $targetDate = \Carbon\Carbon::parse($date);
         $dayOfWeek = $targetDate->format('l'); // e.g. "Sunday"
 
         // Find all active schedules for this doctor on this day
@@ -123,20 +189,20 @@ class Doctor extends Model
             ->where('status', '!=', 'cancelled')
             ->pluck('appointment_time')
             ->map(function ($time) {
-                return Carbon::parse($time)->format('H:i');
+                return \Carbon\Carbon::parse($time)->format('H:i');
             })
             ->toArray();
 
         $availableSlots = [];
 
         foreach ($schedules as $schedule) {
-            $start = Carbon::parse($schedule->start_time);
-            $end = Carbon::parse($schedule->end_time);
+            $start = \Carbon\Carbon::parse($schedule->start_time);
+            $end = \Carbon\Carbon::parse($schedule->end_time);
 
             // Handle midnight (00:00) or cases where end <= start (overnight shift)
             // Treat 00:00 end_time as 23:59 (end of day)
             if ($end->lte($start)) {
-                $end = Carbon::parse('23:59');
+                $end = \Carbon\Carbon::parse('23:59');
             }
 
             // Generate slots every $intervalMinutes until end time
@@ -146,7 +212,7 @@ class Doctor extends Model
                 // Only add if not already booked AND if date is today, time must be in the future
                 $isFutureIfToday = true;
                 if ($targetDate->isToday()) {
-                    $isFutureIfToday = $start->isAfter(Carbon::now());
+                    $isFutureIfToday = $start->isAfter(\Carbon\Carbon::now());
                 }
 
                 if (!in_array($timeString, $bookedTimes) && $isFutureIfToday) {
@@ -173,7 +239,7 @@ class Doctor extends Model
     public function getDisabledDatesForNextDays(int $daysAhead = 60): array
     {
         $disabledDates = [];
-        $today = Carbon::today();
+        $today = \Carbon\Carbon::today();
         
         // Find all active working days for this doctor
         $workingDays = [];

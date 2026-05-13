@@ -1,6 +1,6 @@
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Header -->
         <div class="text-center mb-12">
             <h1 class="text-4xl font-extrabold text-blue-900 mb-4">{{ __('Book Appointment') }}</h1>
@@ -46,11 +46,11 @@
         @if($currentStep == 1)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in">
                 @foreach($this->doctors as $doctor)
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 group cursor-pointer">
                         <div class="relative h-64">
                             <img src="{{ $doctor->display_image }}" alt="{{ $doctor->localized_name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                <button wire:click="selectDoctor({{ $doctor->id }})" class="w-full py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            <div class="hidden sm:flex absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-col items-end p-6 z-10">
+                                <button wire:click="selectDoctor({{ $doctor->id }})" class="w-full py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 cursor-pointer">
                                     {{ __('Select') }}
                                 </button>
                             </div>
@@ -67,7 +67,7 @@
                             </div>
                             <h3 class="text-xl font-bold text-blue-900 mb-1">{{ $doctor->localized_name }}</h3>
                             <p class="text-gray-500 text-sm line-clamp-2 mb-4">{{ $doctor->localized_title }}</p>
-                            <button wire:click="selectDoctor({{ $doctor->id }})" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-md md:hidden">
+                            <button wire:click="selectDoctor({{ $doctor->id }})" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-md md:hidden cursor-pointer relative z-10">
                                 {{ __('Select') }}
                             </button>
                         </div>
@@ -80,24 +80,63 @@
         @if($currentStep == 2)
             <div class="max-w-4xl mx-auto animate-fade-in">
                 <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-                    <div class="flex items-center mb-8">
-                        <button wire:click="goToStep(1)" class="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-blue-600 hover:text-white transition-all mr-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <div>
-                            <h2 class="text-2xl font-extrabold text-blue-900">{{ __('Select Date') }}</h2>
-                            <p class="text-gray-500">{{ __('Booking with') }}: <span class="font-bold text-blue-600">{{ $this->selectedDoctor->localized_name }}</span></p>
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center">
+                            <button wire:click="goToStep(1)" class="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-blue-600 hover:text-white transition-all mr-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <div>
+                                <h2 class="text-2xl font-extrabold text-blue-900">{{ __('Select Date') }}</h2>
+                                <p class="text-gray-500">{{ __('Booking with') }}: <span class="font-bold text-blue-600">{{ $this->selectedDoctor?->localized_name ?? __('Specialist') }}</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Month Navigation -->
+                        <div class="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
+                            <button wire:click="prevMonth" class="p-2 hover:bg-white hover:shadow-md rounded-xl transition-all text-blue-900">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <span class="font-black text-blue-900 min-w-[120px] text-center">{{ $this->viewMonthName }}</span>
+                            <button wire:click="nextMonth" class="p-2 hover:bg-white hover:shadow-md rounded-xl transition-all text-blue-900">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                        @foreach($this->availableDates as $date)
-                            <button wire:click="selectDate('{{ $date['date'] }}')" 
-                                class="flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-300 {{ $selectedDate == $date['date'] ? 'border-blue-600 bg-blue-50 shadow-inner' : 'border-gray-100 bg-gray-50 hover:border-blue-300 hover:bg-white' }}">
-                                <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">{{ $date['month'] }}</span>
-                                <span class="text-3xl font-black text-blue-900 my-1">{{ $date['day'] }}</span>
-                                <span class="text-xs font-medium text-gray-500">{{ $date['label'] }}</span>
-                            </button>
+                    <!-- 7-Column Calendar Grid -->
+                    <div class="grid grid-cols-7 gap-2">
+                        <!-- Day Headers -->
+                        @foreach([__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')] as $dayName)
+                            <div class="text-center py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $dayName }}</div>
+                        @endforeach
+
+                        <!-- Calendar Days -->
+                        @foreach($this->days as $date)
+                            @if(!$date['date'])
+                                <div class="aspect-square"></div>
+                            @else
+                                <button
+                                    @if($date['isAvailable']) wire:click="selectDate('{{ $date['date'] }}')" @endif
+                                    @disabled(!$date['isAvailable'])
+                                    class="aspect-square flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 relative group
+                                        {{ !$date['isAvailable'] ? 'bg-gray-50 border-transparent text-gray-300 cursor-not-allowed opacity-50' : '' }}
+                                        {{ $date['isAvailable'] && $selectedDate != $date['date'] ? 'border-gray-100 bg-white hover:border-blue-300 hover:shadow-lg' : '' }}
+                                        {{ $selectedDate == $date['date'] ? 'border-blue-600 bg-blue-50 shadow-inner' : '' }}
+                                    "
+                                >
+                                    <span class="text-lg font-black {{ $selectedDate == $date['date'] ? 'text-blue-600' : ($date['isAvailable'] ? 'text-blue-900' : 'text-gray-300') }}">
+                                        {{ $date['day'] }}
+                                    </span>
+
+                                    @if($date['isToday'])
+                                        <span class="absolute bottom-1 w-1 h-1 bg-blue-600 rounded-full"></span>
+                                    @endif
+
+                                    @if($date['isAvailable'] && $selectedDate != $date['date'])
+                                        <div class="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+                                    @endif
+                                </button>
+                            @endif
                         @endforeach
                     </div>
                 </div>
@@ -140,7 +179,7 @@
                             <textarea wire:model="notes" rows="3" placeholder="{{ __('Briefly describe the reason for your visit...') }}" class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-blue-600 focus:bg-white focus:outline-none transition-all text-lg font-medium"></textarea>
                         </div>
 
-                        <button wire:click="proceedToSummary" class="w-full py-5 bg-blue-600 text-white text-xl font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl transform hover:-translate-y-1 active:translate-y-0">
+                        <button type="button" wire:click="proceedToSummary" class="w-full py-5 bg-blue-600 text-white text-xl font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl transform hover:-translate-y-1 active:translate-y-0">
                             {{ __('Confirm Appointment') }}
                         </button>
                     </div>
@@ -150,13 +189,13 @@
 
         <!-- Time Selection Modal -->
         @if($showTimeModal)
-            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div wire:key="time-modal-{{ $selectedDate }}" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                    <div class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" wire:click="$set('showTimeModal', false)"></div>
+                    <div class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm transition-opacity z-40" aria-hidden="true" wire:click.self="$set('showTimeModal', false)"></div>
 
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                    <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full animate-pop-in">
+                    <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full animate-pop-in relative z-50 pointer-events-auto">
                         <div class="bg-white px-8 pt-8 pb-4">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-2xl font-black text-blue-900">{{ __('Select Time') }}</h3>
@@ -165,13 +204,13 @@
                                 </button>
                             </div>
                             <p class="text-gray-500 mb-6">
-                                {{ __('Available slots for') }} <span class="font-bold text-blue-600">{{ Carbon::parse($selectedDate)->format('M d, Y') }}</span>
+                                {{ __('Available slots for') }} <span class="font-bold text-blue-600">{{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('M d, Y') }}</span>
                             </p>
 
                             @if(count($this->availableTimes) > 0)
                                 <div class="grid grid-cols-3 gap-3 mb-8">
                                     @foreach($this->availableTimes as $time)
-                                        <button wire:click="selectTime('{{ $time }}')" 
+                                        <button type="button" wire:click="selectTime('{{ $time }}')"
                                             class="py-3 px-4 rounded-xl border-2 border-gray-100 bg-gray-50 text-blue-900 font-bold hover:border-blue-600 hover:bg-blue-50 transition-all">
                                             {{ $time }}
                                         </button>
@@ -191,31 +230,31 @@
 
         <!-- Final Summary Modal -->
         @if($showSummaryModal)
-            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div wire:key="summary-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                    <div class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" wire:click="$set('showSummaryModal', false)"></div>
+                    <div class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm transition-opacity z-40" aria-hidden="true" wire:click.self="$set('showSummaryModal', false)"></div>
 
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                    <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-pop-in">
+                    <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-pop-in relative z-50 pointer-events-auto">
                         <div class="p-10">
                             <h3 class="text-3xl font-black text-blue-900 mb-8 border-b-2 border-gray-100 pb-4">{{ __('Appointment Summary') }}</h3>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                                 <div>
                                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{{ __('Doctor') }}</h4>
                                     <div class="flex items-center">
-                                        <img src="{{ $this->selectedDoctor->display_image }}" class="w-16 h-16 rounded-full object-cover border-4 border-blue-100 mr-4">
+                                        <img src="{{ $this->selectedDoctor?->display_image }}" class="w-16 h-16 rounded-full object-cover border-4 border-blue-100 mr-4">
                                         <div>
-                                            <p class="font-bold text-blue-900">{{ $this->selectedDoctor->localized_name }}</p>
-                                            <p class="text-sm text-gray-500">{{ $this->selectedDoctor->department->localized_name }}</p>
+                                            <p class="font-bold text-blue-900">{{ $this->selectedDoctor?->localized_name }}</p>
+                                            <p class="text-sm text-gray-500">{{ $this->selectedDoctor?->department?->localized_name ?? __('General Medicine') }}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{{ __('Date & Time') }}</h4>
                                     <div class="p-4 bg-blue-50 rounded-2xl border-2 border-blue-100">
-                                        <p class="font-black text-blue-900 text-lg">{{ Carbon::parse($selectedDate)->format('l, M d') }}</p>
+                                        <p class="font-black text-blue-900 text-lg">{{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, M d') }}</p>
                                         <p class="font-bold text-blue-600">{{ $selectedTime }}</p>
                                     </div>
                                 </div>
@@ -232,7 +271,7 @@
                                 <button wire:click="$set('showSummaryModal', false)" class="flex-1 py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-200 transition-all">
                                     {{ __('Edit Details') }}
                                 </button>
-                                <button wire:click="confirmAppointment" class="flex-1 py-4 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 transition-all shadow-lg">
+                                <button type="button" wire:click="confirmAppointment" class="flex-1 py-4 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 transition-all shadow-lg">
                                     {{ __('Confirm & Submit') }}
                                 </button>
                             </div>
@@ -249,6 +288,5 @@
         .animate-pop-in { animation: popIn 0.3s cubic-bezier(0.26, 0.53, 0.74, 1.48); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .tracking-tighter { letter-spacing: -0.05em; }
     </style>
 </div>
