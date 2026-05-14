@@ -1,7 +1,7 @@
 @section('seo')
     <title>{{ $post->title }} | {{ config('app.name') }}</title>
     <meta name="description" content="{{ $post->excerpt }}">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="{{ request()->fullUrl() }}">
@@ -18,7 +18,7 @@
 @endsection
 
 <div class="bg-gray-50 min-h-screen pb-24 font-sans">
-    
+
     <!-- Top Navigation Bar -->
     <div class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
         <div class="container mx-auto px-4 max-w-4xl py-4 flex items-center justify-between">
@@ -26,7 +26,7 @@
                 <x-heroicon-m-arrow-left class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
                 {{ __('Back to') }} {{ $post->type === 'ad' ? __('Offers') : __('Articles') }}
             </a>
-            
+
             <div class="flex gap-3">
                 <button onclick="window.print()" class="p-2 text-gray-400 hover:text-[#003B73] transition-colors bg-gray-50 rounded-full hover:bg-gray-100" title="Print Content">
                     <x-heroicon-m-printer class="w-5 h-5" />
@@ -45,11 +45,11 @@
             @endif
             <span class="text-xs text-gray-400 font-bold">{{ $post->created_at->format('M j, Y') }}</span>
         </div>
-        
+
         <h1 class="text-2xl md:text-3xl font-black text-[#003B73] leading-snug mb-3">
             {{ $post->title }}
         </h1>
-        
+
         <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed mb-6 border-l-[3px] border-[#0062B8] pl-3">
             {{ $post->excerpt }}
         </p>
@@ -73,7 +73,7 @@
 
     <!-- Content (Prose format for rich text reading) -->
     <div class="container mx-auto px-4 max-w-3xl">
-        
+
         <div class="prose prose-lg prose-blue max-w-none prose-headings:font-black prose-headings:text-[#003B73] prose-a:text-[#0062B8] prose-img:rounded-2xl prose-img:shadow-lg mb-16">
             {!! $post->content !!}
         </div>
@@ -92,10 +92,143 @@
                 </a>
             </div>
         @endif
-        
+
         <!-- NATIVE AD INJECTION -->
         <div class="mb-16">
             <x-native-ad />
+        </div>
+
+        <!-- Likes and Comments Section -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-lg mb-16">
+            <!-- Flash Messages -->
+            @if (session()->has('message'))
+                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-blue-800 font-medium">{{ session('message') }}</p>
+                    </div>
+                </div>
+            @endif
+            @if (session()->has('warning'))
+                <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <p class="text-amber-800 font-medium">{{ session('warning') }}</p>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Like Button -->
+            <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <button
+                        wire:click="toggleLike"
+                        class="flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all {{ $userHasLiked ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                    >
+                        <svg class="w-5 h-5 {{ $userHasLiked ? 'text-white' : 'text-red-400' }}" fill="{{ $userHasLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        {{ $userHasLiked ? __('Liked') : __('Like') }}
+                    </button>
+                    <span class="text-gray-600 font-medium">{{ $likesCount }} {{ __('likes') }}</span>
+                </div>
+
+                <div class="flex items-center gap-2 text-gray-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <span class="font-medium">{{ $post->comments->count() }} {{ __('comments') }}</span>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-black text-gray-900 mb-6">{{ __('Comments') }}</h3>
+
+                <!-- Comment Review Notice -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <div>
+                            <p class="text-amber-800 font-medium">{{ __('Comments are moderated') }}</p>
+                            <p class="text-amber-700 text-sm">{{ __('❤️ Likes are instant for everyone! 💬 Comments are reviewed by our team before being published. Please use only letters, numbers, and basic punctuation.') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Comment Form -->
+                @if(Auth::check())
+                    <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-[#003B73] rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                            </div>
+                            <div class="flex-1">
+                                <form wire:submit.prevent="addComment">
+                                    <textarea
+                                        wire:model="newComment"
+                                        rows="3"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003B73] focus:border-transparent resize-none"
+                                        placeholder="{{ __('Share your thoughts...') }}"
+                                    ></textarea>
+                                    <div class="flex justify-end mt-3">
+                                        <button
+                                            type="submit"
+                                            class="bg-[#003B73] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#0062B8] transition-colors"
+                                        >
+                                            {{ __('Post Comment') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200 text-center">
+                        <div class="flex items-center justify-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <p class="text-blue-800 font-medium">{{ __('Login Required for Comments') }}</p>
+                        </div>
+                        <p class="text-blue-700 text-sm mb-4">{{ __('Please log in to share your thoughts. Comments are reviewed before publication.') }}</p>
+                        <a href="/login" class="bg-[#003B73] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#0062B8] transition-colors inline-block">
+                            {{ __('Login to Comment') }}
+                        </a>
+                    </div>
+                @endif
+
+                <!-- Display Comments -->
+                <div class="space-y-6">
+                    @forelse($post->comments as $comment)
+                        <div class="flex items-start gap-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
+                            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-gray-700 font-bold text-sm">{{ strtoupper(substr($comment->name, 0, 1)) }}</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4 class="font-bold text-gray-900">{{ $comment->name }}</h4>
+                                    <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="text-gray-700 leading-relaxed">{{ $comment->content }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <p class="font-medium">{{ __('No comments yet. Be the first to share your thoughts!') }}</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
 
         <!-- Author/Hospital Footer -->
@@ -109,13 +242,13 @@
                     <p class="text-sm text-gray-500">{{ $post->type === 'ad' ? 'Official Offer' : 'Medical Excellence Team' }}</p>
                 </div>
             </div>
-            
+
             <!-- SMART AI BUTTON -->
             <button onclick="window.dispatchEvent(new CustomEvent('open-ai-chat-context', { detail: { type: '{{ $post->type === 'ad' ? 'offer' : 'article' }}', id: {{ $post->id }} } }))" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003B73] text-white px-8 py-4 rounded-full font-black shadow-lg hover:bg-[#0062B8] transition-colors cursor-pointer hover:scale-105 active:scale-95 border-none outline-none">
                 <x-heroicon-s-sparkles class="w-5 h-5" />
                 {{ __('Discuss with AI') }}
             </button>
         </div>
-        
+
     </div>
 </div>
