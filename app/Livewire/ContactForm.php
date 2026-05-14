@@ -26,7 +26,7 @@ class ContactForm extends Component
         $data = $this->validate();
 
         try {
-            $adminEmail = $settings->get('contact_email', 'info@kaafihospitals.so');
+            $adminEmail = $settings->get('admin_notification_email') ?: $settings->get('contact_email', 'info@kaafihospitals.so');
 
             Mail::to($adminEmail)->send(new ContactMessageMail($data));
 

@@ -11,6 +11,8 @@ class BlogPostShow extends Component
 {
     public $post;
     public $newComment = '';
+    public $guestName = '';
+    public $guestEmail = '';
     public $userHasLiked = false;
     public $likesCount = 0;
 
@@ -30,39 +32,59 @@ class BlogPostShow extends Component
 
     public function checkUserLike()
     {
-        // Use session for both authenticated and guest visitors
-        $likedPosts = session('liked_posts', []);
-        $this->userHasLiked = in_array($this->post->id, $likedPosts);
+        $ip = request()->ip();
+        $userId = Auth::id();
+
+        $this->userHasLiked = \App\Models\BlogPostLike::where('blog_post_id', $this->post->id)
+            ->where(function ($query) use ($userId, $ip) {
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                } else {
+                    $query->where('ip_address', $ip);
+                }
+            })->exists();
     }
 
     public function toggleLike()
     {
-        $likedPosts = session('liked_posts', []);
+        $ip = request()->ip();
+        $userId = Auth::id();
 
         if ($this->userHasLiked) {
-            // Unlike
-            $likedPosts = array_values(array_diff($likedPosts, [$this->post->id]));
+            // Unlike: Remove from DB
+            \App\Models\BlogPostLike::where('blog_post_id', $this->post->id)
+                ->where(function ($query) use ($userId, $ip) {
+                    if ($userId) {
+                        $query->where('user_id', $userId);
+                    } else {
+                        $query->where('ip_address', $ip);
+                    }
+                })->delete();
+
             $this->likesCount = max(0, $this->likesCount - 1);
             $this->userHasLiked = false;
         } else {
-            // Like
-            $likedPosts[] = $this->post->id;
-            $likedPosts = array_values(array_unique($likedPosts));
-            $this->likesCount++;
-            $this->userHasLiked = true;
+            // Like: Add to DB
+            try {
+                \App\Models\BlogPostLike::create([
+                    'blog_post_id' => $this->post->id,
+                    'user_id' => $userId,
+                    'ip_address' => $ip,
+                ]);
+                $this->likesCount++;
+                $this->userHasLiked = true;
+            } catch (\Exception $e) {
+                // Duplicate like handled by unique index or other error
+                return;
+            }
         }
 
-        session(['liked_posts' => $likedPosts]);
         $this->post->likes_count = $this->likesCount;
+        $this->post->save();
     }
 
     public function addComment()
     {
-        if (!Auth::check()) {
-            session()->flash('message', 'Please login to comment.');
-            return;
-        }
-
         // Clean the comment to prevent code injection
         $cleanedComment = $this->sanitizeComment($this->newComment);
 
@@ -71,20 +93,30 @@ class BlogPostShow extends Component
             session()->flash('warning', 'Your comment contained special characters that were removed. Please use only letters, numbers, and basic punctuation.');
         }
 
-        $this->validate([
-            'newComment' => 'required|min:5|max:1000'
-        ]);
+        $rules = [
+            'newComment' => 'required|min:5|max:1000',
+        ];
+
+        if (!Auth::check()) {
+            $rules['guestName'] = 'required|min:2|max:50';
+            $rules['guestEmail'] = 'required|email';
+        }
+
+        $this->validate($rules);
 
         BlogComment::create([
             'blog_post_id' => $this->post->id,
             'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'email' => Auth::user()->email,
+            'ip_address' => request()->ip(),
+            'name' => Auth::check() ? Auth::user()->name : $this->guestName,
+            'email' => Auth::check() ? Auth::user()->email : $this->guestEmail,
             'content' => $cleanedComment,
             'is_approved' => false, // Admin approval required
         ]);
 
         $this->newComment = '';
+        $this->guestName = '';
+        $this->guestEmail = '';
 
         session()->flash('message', 'Your comment has been submitted and is pending admin approval. It will be published once reviewed.');
     }
@@ -106,6 +138,31 @@ class BlogPostShow extends Component
 
     public function render()
     {
-        return view('livewire.blog-post-show')->layout('layouts.app');
+        $ip = request()->ip();
+        $userId = Auth::id();
+
+        // Get approved comments for everyone to see
+        $approvedComments = BlogComment::where('blog_post_id', $this->post->id)
+            ->where('is_approved', true)
+            ->latest()
+            ->get();
+
+        // Get pending comments for the CURRENT user only
+        $pendingComments = BlogComment::where('blog_post_id', $this->post->id)
+            ->where('is_approved', false)
+            ->where(function($query) use ($userId, $ip) {
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                } else {
+                    $query->where('ip_address', $ip);
+                }
+            })
+            ->latest()
+            ->get();
+
+        return view('livewire.blog-post-show', [
+            'approvedComments' => $approvedComments,
+            'pendingComments' => $pendingComments
+        ])->layout('layouts.app');
     }
 }

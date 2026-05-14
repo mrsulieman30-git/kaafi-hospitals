@@ -91,10 +91,6 @@ class BlogIndex extends Component
             ->when($this->sortBy === 'oldest', function ($query) {
                 $query->oldest();
             })
-            ->when(empty($this->search) && $this->sortBy === 'latest', function ($query) use ($featuredIds) {
-                // Only exclude featured posts from the grid if the user isn't actively searching
-                $query->whereNotIn('id', $featuredIds);
-            })
             ->when($this->sortBy === 'latest', function ($query) {
                 $query->latest();
             })

@@ -107,7 +107,7 @@
                         <div class="swiper-wrapper">
                             @foreach($featuredPosts as $post)
                                 <div class="swiper-slide">
-                                    <a href="/posts/{{ $post->slug }}" class="group block">
+                                    <a href="/posts/{{ $post->slug }}" class="group block relative z-10">
                                         <div class="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 mx-4 border border-gray-100">
                                             <div class="relative h-64 md:h-80 overflow-hidden">
                                                 <img
@@ -359,6 +359,8 @@ function featuredSlider() {
                     delay: 4000,
                     disableOnInteraction: false,
                 },
+                slideToClickedSlide: true,
+                touchStartPreventDefault: false,
                 pagination: {
                     el: '.swiper-pagination',
                     clickable: true,

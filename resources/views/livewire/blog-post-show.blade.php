@@ -163,53 +163,95 @@
                 </div>
 
                 <!-- Add Comment Form -->
-                @if(Auth::check())
-                    <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 bg-[#003B73] rounded-full flex items-center justify-center flex-shrink-0">
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-[#003B73] rounded-full flex items-center justify-center flex-shrink-0">
+                            @if(Auth::check())
                                 <span class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                            </div>
-                            <div class="flex-1">
-                                <form wire:submit.prevent="addComment">
-                                    <textarea
-                                        wire:model="newComment"
-                                        rows="3"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003B73] focus:border-transparent resize-none"
-                                        placeholder="{{ __('Share your thoughts...') }}"
-                                    ></textarea>
-                                    <div class="flex justify-end mt-3">
-                                        <button
-                                            type="submit"
-                                            class="bg-[#003B73] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#0062B8] transition-colors"
-                                        >
-                                            {{ __('Post Comment') }}
-                                        </button>
+                            @else
+                                <x-heroicon-s-user class="w-6 h-6 text-white" />
+                            @endif
+                        </div>
+                        <div class="flex-1">
+                            <form wire:submit.prevent="addComment">
+                                @if(!Auth::check())
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <input
+                                                wire:model="guestName"
+                                                type="text"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003B73] focus:border-transparent"
+                                                placeholder="{{ __('Your Name') }}"
+                                            >
+                                            @error('guestName') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <input
+                                                wire:model="guestEmail"
+                                                type="email"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003B73] focus:border-transparent"
+                                                placeholder="{{ __('Your Email') }}"
+                                            >
+                                            @error('guestEmail') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                @endif
+
+                                <textarea
+                                    wire:model="newComment"
+                                    rows="3"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003B73] focus:border-transparent resize-none"
+                                    placeholder="{{ __('Share your thoughts...') }}"
+                                ></textarea>
+                                @error('newComment') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                
+                                <div class="flex justify-end mt-3">
+                                    <button
+                                        type="submit"
+                                        class="bg-[#003B73] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#0062B8] transition-colors"
+                                    >
+                                        {{ __('Post Comment') }}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                @else
-                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200 text-center">
-                        <div class="flex items-center justify-center gap-3 mb-4">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                            <p class="text-blue-800 font-medium">{{ __('Login Required for Comments') }}</p>
-                        </div>
-                        <p class="text-blue-700 text-sm mb-4">{{ __('Please log in to share your thoughts. Comments are reviewed before publication.') }}</p>
-                        <a href="/login" class="bg-[#003B73] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#0062B8] transition-colors inline-block">
-                            {{ __('Login to Comment') }}
-                        </a>
-                    </div>
-                @endif
+                </div>
 
                 <!-- Display Comments -->
                 <div class="space-y-6">
-                    @forelse($post->comments as $comment)
+                    <!-- Pending Comments (For current user only) -->
+                    @if($pendingComments->count() > 0)
+                        <div class="space-y-4 mb-8">
+                            <h4 class="text-sm font-bold text-amber-600 uppercase tracking-wider flex items-center gap-2">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                </span>
+                                {{ __('Your Comments (Pending Approval)') }}
+                            </h4>
+                            @foreach($pendingComments as $comment)
+                                <div class="flex items-start gap-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 opacity-80">
+                                    <div class="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span class="text-amber-700 font-bold text-sm">{{ strtoupper(substr($comment->name, 0, 1)) }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h4 class="font-bold text-gray-900">{{ $comment->name }}</h4>
+                                            <span class="text-[10px] bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">{{ __('Pending') }}</span>
+                                        </div>
+                                        <p class="text-gray-600 italic text-sm">{{ $comment->content }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <!-- Approved Comments -->
+                    @forelse($approvedComments as $comment)
                         <div class="flex items-start gap-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
-                            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="text-gray-700 font-bold text-sm">{{ strtoupper(substr($comment->name, 0, 1)) }}</span>
+                            <div class="w-10 h-10 bg-[#003B73] rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-bold text-sm">{{ strtoupper(substr($comment->name, 0, 1)) }}</span>
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-2">
@@ -220,12 +262,14 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                            </svg>
-                            <p class="font-medium">{{ __('No comments yet. Be the first to share your thoughts!') }}</p>
-                        </div>
+                        @if($pendingComments->count() == 0)
+                            <div class="text-center py-8 text-gray-500">
+                                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                <p class="font-medium">{{ __('No comments yet. Be the first to share your thoughts!') }}</p>
+                            </div>
+                        @endif
                     @endforelse
                 </div>
             </div>

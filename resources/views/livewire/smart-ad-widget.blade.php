@@ -15,31 +15,32 @@
                 this.pos.x = window.innerWidth - 90;
                 this.pos.y = window.innerHeight - 90;
 
-                // Check LocalStorage for Refresh Counting logic
-                let isHidden = localStorage.getItem('kaafi_ad_closed_' + this.adId) === 'true';
-                let refreshCount = parseInt(localStorage.getItem('kaafi_ad_refreshes_' + this.adId) || '0');
+                // One-time popup logic per Ad ID
+                let hasBeenSeen = localStorage.getItem('kaafi_ad_seen_' + this.adId) === 'true';
 
-                if (isHidden) {
-                    refreshCount++;
-                    localStorage.setItem('kaafi_ad_refreshes_' + this.adId, refreshCount);
-                    
-                    // If refreshed 3 times, bring it back!
-                    if (refreshCount >= 3) {
-                        localStorage.setItem('kaafi_ad_closed_' + this.adId, 'false');
-                        localStorage.setItem('kaafi_ad_refreshes_' + this.adId, '0');
-                        this.showBubble = true;
-                        setTimeout(() => { this.isOpen = true; $wire.recordView(); }, 1500);
-                    }
-                } else {
+                if (!hasBeenSeen) {
                     this.showBubble = true;
-                    setTimeout(() => { this.isOpen = true; $wire.recordView(); }, 1500);
+                    // Auto-open the popup once
+                    setTimeout(() => { 
+                        this.isOpen = true; 
+                        $wire.recordView();
+                        // Mark as seen so it doesn't auto-open on next refresh
+                        localStorage.setItem('kaafi_ad_seen_' + this.adId, 'true');
+                    }, 1500);
+                } else {
+                    // If it's already been seen, we can still show the bubble 
+                    // but don't auto-open the popup unless they click it.
+                    // Or if they explicitly closed it, we don't even show the bubble.
+                    let isClosed = localStorage.getItem('kaafi_ad_closed_' + this.adId) === 'true';
+                    if (!isClosed) {
+                        this.showBubble = true;
+                    }
                 }
             },
             closeAd() {
                 this.isOpen = false;
                 this.showBubble = false;
                 localStorage.setItem('kaafi_ad_closed_' + this.adId, 'true');
-                localStorage.setItem('kaafi_ad_refreshes_' + this.adId, '0');
             },
             dragStart(e) {
                 this.dragging = true;

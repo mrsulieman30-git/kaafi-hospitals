@@ -75,8 +75,14 @@ class ManageSettings extends Page
                                     ->reorderable()
                                     ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
                                 Forms\Components\TextInput::make('contact_email')
-                                    ->label('Primary Email')
+                                    ->label('Public Contact Email')
+                                    ->helperText('Shown on the contact page and footer.')
                                     ->email(),
+                                Forms\Components\TextInput::make('admin_notification_email')
+                                    ->label('Admin Notification Email')
+                                    ->helperText('Contact form submissions will be sent to this address.')
+                                    ->email()
+                                    ->placeholder('notifications@kaafihospitals.so'),
                                 Forms\Components\TextInput::make('whatsapp_number')
                                     ->label('WhatsApp Number (with country code)')
                                     ->tel()

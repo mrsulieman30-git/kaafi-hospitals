@@ -19,8 +19,10 @@
                     <span class="block">{{ __('Your Health,') }}</span>
                     <span class="block">{{ __('Our Priority') }}</span>
                 </h1>
-                <p class="mt-4 text-lg text-white/95 sm:max-w-xl" style="text-shadow: 0 0 2px rgba(255,255,255,0.85), 1px 1px 2px rgba(0,0,0,0.85), -1px -1px 2px rgba(0,0,0,0.85), 1px -1px 2px rgba(0,0,0,0.85), -1px 1px 2px rgba(0,0,0,0.85);">
-                    {{ __(':name is committed to providing compassionate, high-quality healthcare for you and your family.', ['name' => $siteSettings->get('hospital_name', 'KAAFI Hospitals')]) }}
+                <p class="mt-4 text-lg sm:max-w-xl">
+                    <span class="bg-black text-white px-2 py-1 rounded shadow-sm">
+                        {{ __(':name is committed to providing compassionate, high-quality healthcare for you and your family.', ['name' => $siteSettings->get('hospital_name', 'KAAFI Hospitals')]) }}
+                    </span>
                 </p>
                 <div class="mt-8 flex flex-col sm:flex-row gap-4">
                     <a href="/appointment" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-white bg-[#0062B8] hover:bg-blue-700 transition shadow-lg">
