@@ -6,21 +6,20 @@
     <div class="relative w-full h-[600px] overflow-hidden">
         <!-- Dynamic Background Image -->
         @if($siteSettings->get('hero_bg_path'))
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $siteSettings->get('hero_bg_path')) }}'); opacity: {{ floatval($siteSettings->get('hero_bg_opacity', 10)) / 100 }};"></div>
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $siteSettings->get('hero_bg_path')) }}'); opacity: {{ floatval($siteSettings->get('hero_bg_opacity', 100)) / 100 }};"></div>
         @else
             <img class="absolute inset-0 w-full h-full object-cover object-center" src="{{ asset('images/hospital-reception.jpg') }}" alt="Hospital Reception" onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80'">
         @endif
-        
-        <!-- Gradient Overlay to make text readable on the left -->
-        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
-        
+
+        <div class="absolute inset-0 bg-transparent"></div>
+
         <div class="relative max-w-7xl mx-auto h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl">
-                <h1 class="text-5xl tracking-tight font-extrabold text-[#003B73] sm:text-6xl lg:text-7xl">
+                <h1 class="text-5xl tracking-tight font-extrabold text-white sm:text-6xl lg:text-7xl" style="text-shadow: 0 0 3px rgba(255,255,255,0.9), 1px 1px 2px rgba(0,0,0,0.85), -1px -1px 2px rgba(0,0,0,0.85), 1px -1px 2px rgba(0,0,0,0.85), -1px 1px 2px rgba(0,0,0,0.85);">
                     <span class="block">{{ __('Your Health,') }}</span>
-                    <span class="block text-[#003B73]">{{ __('Our Priority') }}</span>
+                    <span class="block">{{ __('Our Priority') }}</span>
                 </h1>
-                <p class="mt-4 text-lg text-gray-700 sm:max-w-xl">
+                <p class="mt-4 text-lg text-white/95 sm:max-w-xl" style="text-shadow: 0 0 2px rgba(255,255,255,0.85), 1px 1px 2px rgba(0,0,0,0.85), -1px -1px 2px rgba(0,0,0,0.85), 1px -1px 2px rgba(0,0,0,0.85), -1px 1px 2px rgba(0,0,0,0.85);">
                     {{ __(':name is committed to providing compassionate, high-quality healthcare for you and your family.', ['name' => $siteSettings->get('hospital_name', 'KAAFI Hospitals')]) }}
                 </p>
                 <div class="mt-8 flex flex-col sm:flex-row gap-4">
@@ -86,7 +85,7 @@
                 <h2 class="text-3xl md:text-5xl font-black text-[#003B73] mb-6">{{ __('Hospital Milestones') }}</h2>
                 <div class="h-1.5 w-24 bg-[#DC3545] mx-auto rounded-full"></div>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                 @php
                     $milestones = [
@@ -106,12 +105,12 @@
                             @elseif($stat['id'] == 'surgeries') <x-heroicon-o-heart class="w-8 h-8" />
                             @endif
                         </div>
-                        
+
                         <div class="text-4xl md:text-5xl font-black text-[#003B73] mb-3 flex items-center justify-center gap-0.5">
                             <span class="counter" data-target="{{ $stat['target'] }}">0</span>
                             <span class="text-[#DC3545]">{{ $stat['suffix'] }}</span>
                         </div>
-                        
+
                         <div class="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest">{{ $stat['label'] }}</div>
                     </div>
                 @endforeach
@@ -190,7 +189,7 @@
                         <p class="text-sm font-bold text-emerald-600 line-clamp-1 uppercase tracking-wide">
                             {{ $doctor->localized_title }}
                         </p>
-                        
+
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <a href="{{ route('doctors.profile', $doctor->id) }}" class="text-[#0062B8] hover:text-blue-800 font-semibold flex items-center">
                                 {{ __('View Profile') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -200,7 +199,7 @@
                 </div>
                 @endforeach
             </div>
-            
+
             <div class="mt-12 text-center">
                 <a href="/doctors" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[#003B73] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#003B73]">
                     {{ __('View All Doctors') }}
@@ -219,7 +218,7 @@
                     <h2 class="text-2xl font-black text-[#003B73] mb-2">{{ __('Accepted Insurance Providers') }}</h2>
                     <div class="h-1 w-20 bg-emerald-500 mx-auto md:mx-0 rounded-full"></div>
                 </div>
-                
+
                 <div class="flex flex-wrap justify-center items-center gap-4">
                     @php
                         $providers = $siteSettings->get('insurance_providers', [

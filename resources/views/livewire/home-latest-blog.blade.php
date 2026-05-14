@@ -4,7 +4,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <div class="container mx-auto px-4 max-w-7xl relative z-10">
-        
+
         <!-- Alpine.js wrapper -->
         <div x-data="{
             init() {
@@ -29,7 +29,7 @@
                 });
             }
         }">
-            
+
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                     <span class="inline-block bg-blue-50 text-[#0062B8] text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">{{ __('Health Insights') }}</span>
@@ -57,12 +57,12 @@
                         <div class="swiper-slide h-auto">
                             <a href="/posts/{{ $post->slug }}" class="flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_8px_30px_rgba(0,59,115,0.08)] transition-all duration-300 group">
                                 <div class="relative h-40 overflow-hidden bg-gray-100 shrink-0">
-                                    <img src="{{ $post->display_image }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $post->title }}">
+                                    <img src="{{ $post->display_image }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $post->localized_title }}">
                                 </div>
                                 <div class="p-5 flex flex-col flex-1">
                                     <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wide">{{ $post->created_at->format('M d, Y') }}</p>
-                                    <h3 class="text-lg font-black text-gray-900 leading-tight mb-2 group-hover:text-[#0062B8] transition-colors line-clamp-2">{{ $post->title }}</h3>
-                                    <p class="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 font-medium">{{ $post->excerpt }}</p>
+                                    <h3 class="text-lg font-black text-gray-900 leading-tight mb-2 group-hover:text-[#0062B8] transition-colors line-clamp-2">{{ $post->localized_title }}</h3>
+                                    <p class="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 font-medium">{{ $post->localized_excerpt }}</p>
                                     <div class="mt-auto flex items-center pt-3 border-t border-gray-50 text-[#0062B8] text-sm font-bold group-hover:text-emerald-500 transition-colors">
                                         {{ __('Read') }} <x-heroicon-m-arrow-right class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                                     </div>

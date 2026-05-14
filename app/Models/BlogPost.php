@@ -12,7 +12,7 @@ class BlogPost extends Model
 
     protected $guarded = [];
     public $translatable = ['title', 'content', 'excerpt', 'meta_title', 'meta_description'];
-    
+
     protected $casts = [
         'published_at' => 'datetime',
     ];
@@ -28,13 +28,41 @@ class BlogPost extends Model
         });
     }
 
+    public function getLocalizedTitleAttribute()
+    {
+        $locale = app()->getLocale();
+        $raw = $this->getAttributes()['title'] ?? '';
+
+        if (is_string($raw) && str_starts_with(trim($raw), '{')) {
+            $decoded = json_decode($raw, true);
+            $value = $decoded[$locale] ?? ($decoded['so'] ?? ($decoded['en'] ?? $raw));
+            return is_string($value) ? $value : ($decoded['en'] ?? $raw);
+        }
+
+        return $this->title ?? '';
+    }
+
+    public function getLocalizedExcerptAttribute()
+    {
+        $locale = app()->getLocale();
+        $raw = $this->getAttributes()['excerpt'] ?? '';
+
+        if (is_string($raw) && str_starts_with(trim($raw), '{')) {
+            $decoded = json_decode($raw, true);
+            $value = $decoded[$locale] ?? ($decoded['so'] ?? ($decoded['en'] ?? $raw));
+            return is_string($value) ? $value : ($decoded['en'] ?? $raw);
+        }
+
+        return $this->excerpt ?? '';
+    }
+
     // SMART IMAGE HELPER: Checks for URL first, then Upload, then fallback
     public function getDisplayImageAttribute()
     {
         if (!empty($this->featured_image_url)) {
             return $this->featured_image_url;
         }
-        
+
         if (!empty($this->featured_image)) {
             return asset('storage/' . $this->featured_image);
         }
@@ -63,7 +91,7 @@ class BlogPost extends Model
             ->latest()
             ->take(5)
             ->get();
-            
+
         return $ads->isEmpty() ? null : $ads->random();
     }
 }

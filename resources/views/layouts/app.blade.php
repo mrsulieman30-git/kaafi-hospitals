@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     @php
         $hospitalName = $siteSettings->get('hospital_name', 'KAAFI Hospitals');
         $hospitalDescription = __('KAAFI Hospitals provides world-class healthcare with compassionate care and medical excellence in Somalia.');
@@ -16,7 +16,7 @@
     @else
         <title>{{ $hospitalName }} - {{ __('Keeping You Well') }}</title>
         <meta name="description" content="{{ $hospitalDescription }}">
-        
+
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ request()->fullUrl() }}">
@@ -32,12 +32,12 @@
         <meta property="twitter:image" content="{{ $defaultOgImage }}">
     @endif
     @stack('seo')
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
@@ -60,9 +60,9 @@
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    
+
     <!-- Tailwind CSS (CDN for quick dev, will use Vite for prod) -->
-   
+
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="font-sans antialiased text-gray-800 bg-white overflow-x-hidden">
@@ -85,13 +85,13 @@
 
     <div class="bg-[#003B73] text-white text-[10px] md:text-xs font-medium py-2 px-4 border-b border-blue-800/30">
         <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-y-2">
-            
+
             <div class="flex items-center gap-3 sm:gap-6 shrink-0" x-data="{ expanded: false }">
                 <span class="flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span>{{ $globalSettings['city_name'] }}</span>
                 </span>
-                
+
                 <div class="relative flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                     <div class="flex items-center gap-1 cursor-pointer group" @click="expanded = !expanded">
@@ -103,7 +103,7 @@
 
                     <!-- Expandable Dropdown -->
                     @if(!empty($globalSettings['additional_phones']))
-                    <div x-show="expanded" x-cloak @click.away="expanded = false" 
+                    <div x-show="expanded" x-cloak @click.away="expanded = false"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
                          x-transition:enter-end="opacity-100 translate-y-0"
@@ -176,14 +176,14 @@
     <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                
+
                 <div class="flex items-center shrink-0">
                     <a href="/" class="flex items-center gap-3">
                         <div class="flex items-center">
                             @if($siteSettings->get('logo_path'))
                                 {{-- Dynamic Logo from Admin Settings --}}
-                                <img src="{{ asset('storage/' . $siteSettings->get('logo_path')) }}" 
-                                     alt="{{ $siteSettings->get('hospital_name', 'KAAFI Hospitals') }}" 
+                                <img src="{{ asset('storage/' . $siteSettings->get('logo_path')) }}"
+                                     alt="{{ $siteSettings->get('hospital_name', 'KAAFI Hospitals') }}"
                                      class="h-10 md:h-12 w-auto object-contain"
                                      style="height: {{ $siteSettings->get('logo_height', 48) }}px;">
                             @else
@@ -218,8 +218,8 @@
                             <svg class="w-5 h-5 mb-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             <span class="text-[11px] lg:text-xs font-bold leading-tight whitespace-nowrap">{{ __('Services') }}</span>
                         </a>
-                        
-                        <div x-show="open" x-cloak 
+
+                        <div x-show="open" x-cloak
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 translate-y-2"
                              x-transition:enter-end="opacity-100 translate-y-0"
@@ -232,9 +232,9 @@
                                             <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                         @endif
                                     </a>
-                                    
+
                                     @if($dept->children->count() > 0)
-                                        <div x-show="subOpen" x-cloak 
+                                        <div x-show="subOpen" x-cloak
                                              class="absolute left-full top-0 w-64 bg-white border border-gray-100 shadow-2xl rounded-2xl py-3 ml-1 z-[101]">
                                             @foreach($dept->children as $child)
                                                 <a href="{{ route('departments.show', $child->slug) }}" class="block px-5 py-2.5 text-sm font-bold text-[#003B73] hover:bg-blue-50 hover:text-[#0062B8] transition border-l-2 border-transparent hover:border-blue-500">
@@ -291,7 +291,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div x-show="mobileMenuOpen" x-collapse x-cloak class="xl:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 z-40">
             <div class="px-4 py-6 flex flex-col gap-4">
                 <a href="/" class="text-base font-bold {{ request()->is('/') ? 'text-[#0062B8]' : 'text-gray-800' }}">{{ __('Home') }}</a>
@@ -348,72 +348,72 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-kaafi-navy text-white pt-16 pb-8">
-        <div class="container mx-auto px-4">
+    <footer class="bg-white text-slate-800 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 <div>
-                    <h3 class="text-2xl font-bold mb-4">KAAFI <span class="text-blue-300">HOSPITALS</span></h3>
-                    <p class="text-blue-100 mb-6">{{ __('Providing world-class healthcare') }}. {{ __('Keeping You Well. We are committed to providing compassionate, high-quality healthcare for you and your family.') }}</p>
+                    <h3 class="text-2xl font-bold mb-4 text-[#003B73]">KAAFI <span class="text-[#0062B8]">HOSPITALS</span></h3>
+                    <p class="text-slate-600 mb-6">{{ __('Providing world-class healthcare') }}. {{ __('Keeping You Well. We are committed to providing compassionate, high-quality healthcare for you and your family.') }}</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center hover:bg-kaafi-blue transition">
+                        <a href="#" class="w-10 h-10 rounded-full bg-[#003B73] flex items-center justify-center hover:bg-[#0062B8] transition">
                             <span class="sr-only">Facebook</span>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
                         </a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center hover:bg-kaafi-blue transition">
+                        <a href="#" class="w-10 h-10 rounded-full bg-[#003B73] flex items-center justify-center hover:bg-[#0062B8] transition">
                             <span class="sr-only">Twitter</span>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
                         </a>
                     </div>
                 </div>
-                
+
                 <div>
-                    <h4 class="text-xl font-bold mb-4 border-b border-blue-800 pb-2 inline-block">{{ __('Quick Links') }}</h4>
-                    <ul class="space-y-2 text-blue-100">
-                        <li><a href="/" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Home') }}</a></li>
-                        <li><a href="/about" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('About Us') }}</a></li>
-                        <li><a href="/departments" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Departments') }}</a></li>
-                        <li><a href="/doctors" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Doctors') }}</a></li>
-                        <li><a href="/blog" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Latest News') }}</a></li>
-                        <li><a href="{{ route('careers.index') }}" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Careers') }}</a></li>
-                        <li><a href="/contact" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Contact Us') }}</a></li>
+                    <h4 class="text-xl font-bold mb-4 border-b border-slate-200 pb-2 inline-block text-[#003B73]">{{ __('Quick Links') }}</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="/" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Home') }}</a></li>
+                        <li><a href="/about" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('About Us') }}</a></li>
+                        <li><a href="/departments" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Departments') }}</a></li>
+                        <li><a href="/doctors" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Doctors') }}</a></li>
+                        <li><a href="/blog" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Latest News') }}</a></li>
+                        <li><a href="{{ route('careers.index') }}" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Careers') }}</a></li>
+                        <li><a href="/contact" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Contact Us') }}</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
-                    <h4 class="text-xl font-bold mb-4 border-b border-blue-800 pb-2 inline-block">{{ __('Our Departments') }}</h4>
-                    <ul class="space-y-2 text-blue-100">
-                        <li><a href="/departments/cardiology" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Cardiology') }}</a></li>
-                        <li><a href="/departments/neurology" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Neurology') }}</a></li>
-                        <li><a href="/departments/pediatrics" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Pediatrics') }}</a></li>
-                        <li><a href="/departments/orthopedics" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Orthopedics') }}</a></li>
-                        <li><a href="/departments/laboratory" class="hover:text-white transition flex items-center"><span class="mr-2">›</span> {{ __('Laboratory') }}</a></li>
+                    <h4 class="text-xl font-bold mb-4 border-b border-slate-200 pb-2 inline-block text-[#003B73]">{{ __('Our Departments') }}</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="/departments/cardiology" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Cardiology') }}</a></li>
+                        <li><a href="/departments/neurology" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Neurology') }}</a></li>
+                        <li><a href="/departments/pediatrics" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Pediatrics') }}</a></li>
+                        <li><a href="/departments/orthopedics" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Orthopedics') }}</a></li>
+                        <li><a href="/departments/laboratory" class="hover:text-[#0062B8] transition flex items-center"><span class="mr-2">›</span> {{ __('Laboratory') }}</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
-                    <h4 class="text-xl font-bold mb-4 border-b border-blue-800 pb-2 inline-block">{{ __('Contact Information') }}</h4>
-                    <ul class="space-y-4 text-blue-100">
+                    <h4 class="text-xl font-bold mb-4 border-b border-slate-200 pb-2 inline-block text-[#003B73]">{{ __('Contact Information') }}</h4>
+                    <ul class="space-y-4 text-slate-600">
                         <li class="flex items-start">
-                            <svg class="w-5 h-5 mr-3 mt-1 text-kaafi-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <span>Wadajir District,<br>Mogadishu, Somalia</span>
+                            <svg class="w-5 h-5 mr-3 mt-1 text-[#0062B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span>{{ $globalSettings['hospital_address'] }}</span>
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-kaafi-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                            <span>+252 615 666 999</span>
+                            <svg class="w-5 h-5 mr-3 text-[#0062B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <span>{{ $globalSettings['emergency_phone'] }}</span>
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-kaafi-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            <span>info@kaafihospitals.so</span>
+                            <svg class="w-5 h-5 mr-3 text-[#0062B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span>{{ $globalSettings['hospital_email'] }}</span>
                         </li>
                     </ul>
                 </div>
             </div>
-            
-            <div class="border-t border-blue-900 pt-6 text-center text-sm text-blue-200 flex flex-col md:flex-row justify-between items-center">
+
+            <div class="border-t border-slate-200 pt-6 text-center text-sm text-slate-500 flex flex-col md:flex-row justify-between items-center">
                 <p>&copy; {{ date('Y') }} KAAFI Hospitals. {{ __('All Rights Reserved') }}.</p>
                 <div class="mt-4 md:mt-0 space-x-4">
-                    <a href="#" class="hover:text-white transition">{{ __('Privacy Policy') }}</a>
-                    <a href="#" class="hover:text-white transition">{{ __('Terms of Service') }}</a>
+                    <a href="#" class="text-[#003B73] hover:text-[#0062B8] transition">{{ __('Privacy Policy') }}</a>
+                    <a href="#" class="text-[#003B73] hover:text-[#0062B8] transition">{{ __('Terms of Service') }}</a>
                 </div>
             </div>
         </div>
@@ -421,7 +421,7 @@
 
     <!-- AI Chatbot Placeholder (Livewire Component will go here) -->
     <livewire:ai-chat-widget />
-    
+
     @livewireScripts
 </body>
 </html>
